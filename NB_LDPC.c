@@ -73,12 +73,6 @@ int main(int argc, char * argv[])
     int synd=0, nbErrors, nbErroneousFrames = 0, nbUndetectedErrors = 0;
     int total_errors =0;
 
-
-
-
-
-
-
     code_t code;
     table_t table;
     decoder_t decoder;
@@ -184,57 +178,7 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
 
 
     int sum_it;
-
-
     int n_cv = NbOper;
-
-////generate config_table
-//    int d_1=40;
-//    int d_2=15;
-//    int d_3=5;
-//    int **config_table;
-//    int config_table_size;
-//
-//    config_table = build_config_table(&config_table_size,dc_max,d_1, d_2, d_3);
-//    sort_config_table( config_table, config_table_size, dc_max);
-//
-//    config_table_size = 1000;
-//
-//    int j;
-//    k=0;
-//    l=0;
-//    g=0;
-//    int config_table_size_2d[dc_max];
-//    for (j=0; j<dc_max; j++)
-//    {
-//        config_table_size_2d[j]=0;
-//    }
-//
-//    for (i=0; i<config_table_size; i++)
-//    {
-////    printf(" \n \n");
-////    printf("%d :\t",i);
-////    for(j=0; j<dc_max; j++)
-////        printf(" %d \t",config_table[i][j]);
-//        if (config_table[i][0]==0) k++;
-//        if (config_table[i][1]==0) g++;
-//        if (config_table[i][dc_max-1]==0) l++;
-//
-//        for (j=0; j<dc_max; j++)
-//        {
-//            if (config_table[i][j]==0) config_table_size_2d[j]++;
-//        }
-//
-//    }
-//    printf("\n tablesize:%d, decorrelated size1=%d size2=%d size3=%d \n",config_table_size,k,g,l);
-//    for (j=0; j<dc_max; j++)
-//    {
-//        printf(" %d \t",config_table_size_2d[j]);
-//    }
-//    getchar();
-
-
-
 
 
 //    getchar();
@@ -385,16 +329,9 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
 //                    getchar();
 
 
-                //    syndrome_ems(node, &decoder, &code, &table, config_table, config_table_size, dc_max, offset, n_cv);// n_cv=NbOper
-
-//syndrome_ems3(node, &decoder, &code, &table, config_table, config_table_size, dc_max, offset);
-//CheckPassLogEMS_bayes (node, &decoder, &code, &table, offset);
                 CheckPassLogEMS (node, &decoder, &code, &table,NbOper,offset);
 
-                //CheckPassLogEMS_presorting (node, &decoder, &code, &table, NbOper,offset,stat_bubble,stat_on);
-                //CheckPassLogEMS_presorting_synd(node, &decoder, &code, &table, NbOper,offset,stat_bubble,stat_on);
-                //CheckPassLogEMS_presorting_synd_bayes(node, &decoder, &code, &table, NbOper,offset,stat_bubble,stat_on);
-                //CheckPassLogEMS_tree(node, &decoder, &code, &table, offset,stat_bubble);
+
 
 
 
@@ -484,9 +421,6 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
                     nbErrors ++ ;
         }
 
-//        //fake BCH with 12errors correction capacity
- //       if (nbErrors<13) nbErrors=0;
-
 
         total_errors = total_errors + nbErrors;
         if (nbErrors != 0)
@@ -510,52 +444,6 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
 
     }
     printf(" \n results are printed in file %s \n",file_name);
-
-
-
-
-//opfile=fopen("./data/bubble_stat.txt","w");
-//    for (k=0; k <(code.rowDegree[0]-2)*3; k++ )
-//    {
-//
-//        printf( "bubble check number: %d \n",k );
-//
-//        for (i=0; i<decoder.nbMax; i++)
-//        {
-//            for (l=0; l<decoder.nbMax; l++)
-//            {
-//    printf(" %d ", stat_bubble[i + decoder.nbMax * l + k * decoder.nbMax * decoder.nbMax ]);
-//    fprintf(opfile," %d ", stat_bubble[i + decoder.nbMax * l + k * decoder.nbMax * decoder.nbMax ]);
-//            }
-//            printf(" \n ");
-//            fprintf(opfile," \n ");
-//        }
-//
-//    }
-
-//// backward stat
-//opfile=fopen("./data/bubble_stat.txt","w");
-//    for (k=0; k <(code.rowDegree[0]-1); k++ ) //backward
-//    //for (k=0; k <2; k++ )// tree
-//    {
-//
-//        printf( "bubble check number: %d \n",k );
-//
-//        for (i=0; i<stat_on; i++)
-//        {
-//            for (l=0; l<stat_on; l++)
-//            {
-//    printf(" %d ", stat_bubble[i + stat_on * l + k * stat_on * stat_on ]);
-//
-//    fprintf(opfile," %d ", stat_bubble[i + stat_on * l + k * stat_on * stat_on ]);
-//            }
-//            printf(" \n ");
-//            fprintf(opfile," \n ");
-//        }
-//
-//    }
-
-
 
 
 
