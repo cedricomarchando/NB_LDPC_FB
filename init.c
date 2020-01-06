@@ -194,6 +194,7 @@ void LoadCode (char *FileMatrix, code_t *code)
 
 #ifndef KN_matrix
 printf(" \n UBS alist format is used! \n");
+int temp_int;
     for (m=0; m<M; m++)
         for (k=0; k<code->rowDegree[m]; k++)
             fscanf(f,"%d",&code->mat[m][k]);
@@ -201,8 +202,15 @@ printf(" \n UBS alist format is used! \n");
 
 
     for (m=0; m<M; m++)
+    {
         for (k=0; k<code->rowDegree[m]; k++)
-            fscanf(f,"%d",&code->matValue[m][k]);
+        {
+            fscanf(f,"%d",&temp_int);
+            code->matValue[m][k]=temp_int;
+            //code->matValue[m][k] = BinSymbol_dec_32[temp_int];
+        }
+    }
+
 
 #endif
 
@@ -428,7 +436,7 @@ void LoadTables (table_t *table, int GF, int logGF)
 {
     int nbRow, nbCol, g,k,l;
 
-    if(GF!=16 && GF!=64 && GF!=256)
+    if(GF!=16 && GF!=32 && GF!=64 && GF!=256)
     {
         printf("The binary image of GF(%d) is not available in this version of the program. Please try GF(64) or GF(256)\n",GF);
         exit(EXIT_FAILURE);
@@ -476,6 +484,15 @@ void LoadTables (table_t *table, int GF, int logGF)
         //fflush(stdout);
     }
 
+
+    if(GF==32)
+    {
+        for(g=0; g<GF; g++)
+            for(l=0; l<logGF; l++)
+                table->BINGF[g][l] = BinGF_32[g][l];
+        //printf("Loading of the binary image of GF(64): Success\n");
+        //fflush(stdout);
+    }
 
     if(GF==64)
     {
