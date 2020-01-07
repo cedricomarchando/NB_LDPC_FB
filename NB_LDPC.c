@@ -43,10 +43,11 @@
  * Output
  *              Frame Error Rate for the given simulation parameters
  * Input File : 'FileMatrix' is an ASCII file with the parity-check matrix description in aList format.
- * Output File : non
+ * Output File : in ./data file
+ *
  *
  * Test description: Run the executable with the following parameters
-	./EMS_HS_bubbleCheck_ForBack.exe 10000 100 Mat24_N192_Alist 1.75 24 1 48 result
+	./essai 10000 100 Mat24_N192_Alist 1.75 24 1 48 result
 
 	 NbMonteCarlo     : 10000
 	 NbIterMax        : 100
@@ -58,6 +59,11 @@
 LDPC code parameters: N=192  K=96  M=96  CodeRate=0.5  GF=64  logGF=6
 Loading of the binary image of GF(64): Success
 <0> FER= 13/ 10000 = 0.0013013
+
+make
+./essai 2000 10 ./matrices/KN/N576_K480_GF64.txt 3.5 20 0.3 2
+
+<0> FER = 40/751 = 0.053262 BER = 520 / x = 0.001443 avr_it = 2.58
 
 */
 int main(int argc, char * argv[])
