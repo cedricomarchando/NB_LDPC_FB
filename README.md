@@ -20,7 +20,7 @@ Frame Error Rate for the given simulation parameters
 
 ## input and output files
  * Input File : 'FileMatrix' is an ASCII file with the parity-check matrix description in aList format.
- * Output File : in ./data file
+ * Output File : a txt file giving in the ./data forder giving SNR, BER, average number of iterations and time of the end of simulation
 
 ## Simulation on windows
 
@@ -32,9 +32,11 @@ in the Projet-> Set Programs' arguments
 
 ## Simulation on Linux
 
+compile the c code using the makefile
+
 > make
 
-then
+then run with appropriate parameters
 
 > ./essai 2000 10 ./matrices/KN/N576_K480_GF64.txt 3.5 20 0.3 25
 
