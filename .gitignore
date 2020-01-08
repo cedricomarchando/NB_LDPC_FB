@@ -1,3 +1,10 @@
 bin/*
+# ignore files in the folder obj
 obj/*
+# but keep the folder
+!obj/.gitkeep
+# ignore files in the folder data
+data/*
+# but keep the folder
+!data/.gitkeep
 test.*
