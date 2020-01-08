@@ -2,7 +2,7 @@
 
 You can use this code to simulation NB-LDPC matrices using the Extented-Min Sum (EMS) algorithm. The Check Node (CN) is processed using Forward Backward(FB) algorithm. The FB algorithm splits CN   in elementary CNs (ECN)
 
-#usage
+# usage
 
 ## input argument
  there are 7 arguments
