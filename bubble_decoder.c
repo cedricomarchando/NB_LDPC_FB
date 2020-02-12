@@ -135,14 +135,17 @@ void CheckPassLogEMS (int node,decoder_t *decoder, code_t *code, table_t *table,
         //printf("\n node=%d, coef=%d \n",node,code->matValue[node][t] );
         for(k=0; k<nbMax; k++)
         {
-
             //printf(" %d ->",decoder->M_VtoC_GF[t][k]);
-
 
             if (decoder->M_VtoC_GF[t][k]!=-1)
             {
                 c=decoder->M_VtoC_GF[t][k];
-                decoder->M_VtoC_GF[t][k]=table->MULGF[c][code->matValue[node][t]];
+
+                // GF multiplication and output decimal
+                c=table->MULDEC[c][code->matValue[node][t]];
+
+                decoder->M_VtoC_GF[t][k] =c;
+
             }
             else printf("M_VtoC_GF[%d][%d]=%d\n",t,k,decoder->M_VtoC_GF[t][k]);
 
@@ -242,14 +245,11 @@ void CheckPassLogEMS (int node,decoder_t *decoder, code_t *code, table_t *table,
                 Stp=nbMax;
         }
 
-
-
-
-
+        // back to GF symbol and devise
         for(k=0; k<Stp; k++)
         {
-            decoder->M_CtoV_GF[t][k]=table->DIVGF[decoder->M_CtoV_GF[t][k]][code->matValue[node][t]];
-
+            //decoder->M_CtoV_GF[t][k]=table->DIVGF[decoder->M_CtoV_GF[t][k]][code->matValue[node][t]];
+            decoder->M_CtoV_GF[t][k]=table->DIVDEC[decoder->M_CtoV_GF[t][k]][code->matValue[node][t]];
 
         }
 
@@ -483,7 +483,9 @@ int ElementaryStep(float *Input1,float *Input2,int *IndiceInput1,int *IndiceInpu
             break;
         }
 
-        Indice_aux = ADDGF[IndiceInput1[(int)(tab_comp[1][pos])]][IndiceInput2[(int)(tab_comp[2][pos])]];
+                // bitwise xor operation
+                Indice_aux = IndiceInput1[(int)(tab_comp[1][pos])] ^ IndiceInput2[(int)(tab_comp[2][pos])];
+
 
         // control redundancy in the output list
         // transfer from tab_comp to output Out, IndiceOut
