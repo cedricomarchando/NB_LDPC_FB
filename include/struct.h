@@ -74,6 +74,9 @@ typedef struct
     int **ADDGF;		/* Addition table in GFq */
     int **MULGF;		/* Multiplication table in GFq */
     int **DIVGF;		/* Division table in GFq */
+    int *DECGF;         /*Mapping symbol GFq -> binary converted to decimal */
+    int **MULDEC;       /* Multiplication in decimal */
+    int **DIVDEC;       /* Division in decimal */
 } table_t;
 
 /** *************************************************************************/
@@ -256,6 +259,8 @@ static const int BinGF_64[64][6]=
     {1,0,0,0,1,1},
     {1,0,0,0,0,1},
 };
+
+
 
 
 /*! Binary image of field GF(256)
