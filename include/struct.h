@@ -75,6 +75,7 @@ typedef struct
     int **MULGF;		/* Multiplication table in GFq */
     int **DIVGF;		/* Division table in GFq */
     int *DECGF;         /*Mapping symbol GFq -> binary converted to decimal */
+    int *GFDEC;         /*Mapping decimal to GF symbol */
     int **MULDEC;       /* Multiplication in decimal */
     int **DIVDEC;       /* Division in decimal */
 } table_t;
