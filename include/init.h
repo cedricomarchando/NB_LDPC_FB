@@ -14,6 +14,11 @@ void Table_Mul_GF(int **MULGF, int GF);
 
 void Table_Div_GF(int **DIVGF, int GF);
 
+void Table_dec_GF(table_t *table, int GF, int logGF);
+
+void Table_Mul_DEC(table_t *table, int GF);
+
+void Table_Div_DEC(table_t *table, int GF);
 
 
 void LoadCode (char *FileMatrix, code_t *code);
