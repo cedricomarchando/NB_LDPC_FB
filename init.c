@@ -52,6 +52,81 @@ void Table_Add_GF(table_t *table, int GF, int logGF)
     }
 }
 
+void Table_Mul_DEC(table_t *table, int GF)
+{
+
+    int i,j;
+    for(i=0; i<GF; i++)
+    {
+        for(j=0; j<GF; j++)
+        {
+        table->MULDEC[table->DECGF[i]][table->DECGF[j]]=table->DECGF[table->MULGF[i][j]];
+        }
+    }
+
+//    for(i=0; i<GF; i++)
+//    {
+//        for(j=0; j<GF; j++)
+//        {
+//          printf("%d ",table->MULDEC[i][j]);
+//        }
+//        printf(" \n ");
+//    }
+//    getchar();
+
+}
+
+
+void Table_Div_DEC(table_t *table, int GF)
+{
+
+    int i,j;
+    for(i=0; i<GF; i++)
+    {
+        for(j=0; j<GF; j++)
+        {
+        table->DIVDEC[table->DECGF[i]][table->DECGF[j]]=table->DECGF[table->DIVGF[i][j]];
+        }
+    }
+
+//    for(i=0; i<GF; i++)
+//    {
+//        for(j=0; j<GF; j++)
+//        {
+//          printf("%d ",table->DIVDEC[i][j]);
+//        }
+//        printf(" \n ");
+//    }
+//    getchar();
+
+}
+
+
+
+
+void Table_dec_GF(table_t *table, int GF, int logGF)
+{
+    int i,j;
+
+    //test bin2dec
+    int sum;
+    int tmp;
+    for (j=0; j<GF; j++)
+    {
+        sum = 0;
+        for (i=0; i<logGF; i++)
+        {
+            tmp = table->BINGF[j][i];
+            //printf("%d",tmp);
+            sum =sum + (tmp<<i);
+        }
+        table->DECGF[j]=sum;
+        //printf(" \n bin2dec of GF %d is %d \n",j,sum);
+    }
+    //getchar();
+}
+
+
 /*!
  * \fn Table_Mul_GF
  * \brief compute the multiplication table in GF(q)
@@ -85,7 +160,20 @@ void Table_Mul_GF(int **MULGF, int GF)
             }
         }
     }
+//    for(i=0; i<GF; i++)
+//    {
+//        for(j=0; j<GF; j++)
+//        {
+//          printf("%d ",MULGF[i][j]);
+//        }
+//        printf(" \n ");
+//    }
+//    getchar();
+
 }
+
+
+
 
 /*!
  * \fn Table_Div_GF
@@ -107,7 +195,7 @@ void Table_Div_GF(int **DIVGF, int GF)
         {
             if(j==0)
             {
-                DIVGF[i][j]=-1;
+                DIVGF[i][j]=0;
             }
             else if(i==0)
             {
@@ -127,6 +215,15 @@ void Table_Div_GF(int **DIVGF, int GF)
             }
         }
     }
+//    for(i=0; i<GF; i++)
+//    {
+//        for(j=0; j<GF; j++)
+//        {
+//          printf("%d ",DIVGF[i][j]);
+//        }
+//        printf(" \n ");
+//    }
+//    getchar();
 }
 
 
@@ -453,26 +550,40 @@ void LoadTables (table_t *table, int GF, int logGF)
 
     nbRow = GF;
     nbCol = GF;
-    /* ADDGF [GF][logGF] */
+    /* ADDGF [GF][GF] */
     table->ADDGF =calloc((size_t)nbRow,sizeof(int *));
     //if (table->ADDGF  == NULL) err(EXIT_FAILURE,"%s:%d > malloc failed !",__FILE__,__LINE__);
     table->ADDGF [0] = calloc((size_t)nbRow*nbCol,sizeof(int));
     //if (table->ADDGF [0] == NULL) err(EXIT_FAILURE,"%s:%d > malloc failed !",__FILE__,__LINE__);
     for (k=1; k<nbRow; k++) table->ADDGF[k] = table->ADDGF[0] + k*nbCol;
 
-    /* MULGF [GF][logGF] */
+    /*DECGF [GF] */
+    table->DECGF = calloc(GF,sizeof(int));
+
+    /* MULGF [GF][GF] */
     table->MULGF =calloc((size_t)nbRow,sizeof(int *));
     //if (table->MULGF  == NULL) err(EXIT_FAILURE,"%s:%d > malloc failed !",__FILE__,__LINE__);
     table->MULGF [0] = calloc((size_t)nbRow*nbCol,sizeof(int));
     //if (table->MULGF [0] == NULL) err(EXIT_FAILURE,"%s:%d > malloc failed !",__FILE__,__LINE__);
     for (k=1; k<nbRow; k++) table->MULGF[k] = table->MULGF[0] + k*nbCol;
 
-    /* DIVGF [GF][logGF] */
+    /* DIVGF [GF][GF] */
     table->DIVGF =calloc((size_t)nbRow,sizeof(int *));
     //if (table->DIVGF  == NULL) err(EXIT_FAILURE,"%s:%d > malloc failed !",__FILE__,__LINE__);
     table->DIVGF [0] = calloc((size_t)nbRow*nbCol,sizeof(int));
     //if (table->DIVGF [0] == NULL) err(EXIT_FAILURE,"%s:%d > malloc failed !",__FILE__,__LINE__);
     for (k=1; k<nbRow; k++) table->DIVGF[k] = table->DIVGF[0] + k*nbCol;
+
+    /* MULDEC [GF][GF] */
+    table->MULDEC =calloc((size_t)nbRow,sizeof(int *));
+    table->MULDEC [0] = calloc((size_t)nbRow*nbCol,sizeof(int));
+    for (k=1; k<nbRow; k++) table->MULDEC[k] = table->MULDEC[0] + k*nbCol;
+
+    /* DIVDEC [GF][GF] */
+    table->DIVDEC =calloc((size_t)nbRow,sizeof(int *));
+    table->DIVDEC [0] = calloc((size_t)nbRow*nbCol,sizeof(int));
+    for (k=1; k<nbRow; k++) table->DIVDEC[k] = table->DIVDEC[0] + k*nbCol;
+
 
 
     if(GF==16)
@@ -517,8 +628,11 @@ void LoadTables (table_t *table, int GF, int logGF)
      * Build the addition, multiplication and division tables (corresponding to GF[q])
      */
     Table_Add_GF (table,GF,logGF);
+    Table_dec_GF(table, GF,logGF);
     Table_Mul_GF (table->MULGF,GF);
     Table_Div_GF (table->DIVGF,GF);
+    Table_Mul_DEC(table,GF);
+    Table_Div_DEC(table,GF);
 
 }
 
