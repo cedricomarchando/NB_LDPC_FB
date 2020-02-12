@@ -52,6 +52,7 @@ void Table_Add_GF(table_t *table, int GF, int logGF)
     }
 }
 
+// multiply GF values and output decimal
 void Table_Mul_DEC(table_t *table, int GF)
 {
 
@@ -60,7 +61,8 @@ void Table_Mul_DEC(table_t *table, int GF)
     {
         for(j=0; j<GF; j++)
         {
-        table->MULDEC[table->DECGF[i]][table->DECGF[j]]=table->DECGF[table->MULGF[i][j]];
+        //table->MULDEC[table->DECGF[i]][table->DECGF[j]]=table->DECGF[table->MULGF[i][j]];
+        table->MULDEC[i][j]=table->DECGF[table->MULGF[i][j]];
         }
     }
 
@@ -76,7 +78,7 @@ void Table_Mul_DEC(table_t *table, int GF)
 
 }
 
-
+//divide dicimal by GF and output GF
 void Table_Div_DEC(table_t *table, int GF)
 {
 
@@ -85,7 +87,8 @@ void Table_Div_DEC(table_t *table, int GF)
     {
         for(j=0; j<GF; j++)
         {
-        table->DIVDEC[table->DECGF[i]][table->DECGF[j]]=table->DECGF[table->DIVGF[i][j]];
+        //table->DIVDEC[table->DECGF[i]][table->DECGF[j]]=table->DECGF[table->DIVGF[i][j]];
+        table->DIVDEC[table->DECGF[i]][j]=table->DIVGF[i][j];
         }
     }
 
@@ -108,7 +111,7 @@ void Table_dec_GF(table_t *table, int GF, int logGF)
 {
     int i,j;
 
-    //test bin2dec
+    //bin2dec
     int sum;
     int tmp;
     for (j=0; j<GF; j++)
@@ -121,10 +124,12 @@ void Table_dec_GF(table_t *table, int GF, int logGF)
             sum =sum + (tmp<<i);
         }
         table->DECGF[j]=sum;
+        table->GFDEC[sum]=j;
         //printf(" \n bin2dec of GF %d is %d \n",j,sum);
     }
     //getchar();
 }
+
 
 
 /*!
@@ -559,6 +564,8 @@ void LoadTables (table_t *table, int GF, int logGF)
 
     /*DECGF [GF] */
     table->DECGF = calloc(GF,sizeof(int));
+    /*GFDEC [GF] */
+    table->GFDEC = calloc(GF,sizeof(int));
 
     /* MULGF [GF][GF] */
     table->MULGF =calloc((size_t)nbRow,sizeof(int *));
