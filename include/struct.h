@@ -98,6 +98,7 @@ typedef struct
     int nbBranch; /* nombre de branches dans le graphe de Tanner */
     softdata_t 	**CtoV;		/* An array to store the nbMax largest Check_to_Variable reliabilities for all edges on the graph
 							CtoV Array size = (nbBranch x nbMax) */
+    softdata_t 	**VtoC;		/* An array to store the nbMax largest Variable to Check reliabilities for all edges on the graph VtoC Array size = (nbBranch x nbMax) */
     softdata_t 	**intrinsic_LLR;	   /* An array to store intrinsic Log intrinsic_LLR Ratios received from channel. Each variable node has GF intrinsic
                                       LLRs. So, the size of intrinsic_LLR is (N x GF) where N is the number of VNs and GF is the order of the Galois
                                       field. The values are sorted in decreasing way */
