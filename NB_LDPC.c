@@ -253,28 +253,15 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
         }
 
 
-        // init APP with soft input
+
+        // init Mvc with intrinsic
         for (n=0; n<code.N; n++)
         {
             for (k=0; k<code.GF; k++)
             {
-                decoder.APP[n][decoder.intrinsic_GF[n][k]]=decoder.intrinsic_LLR[n][k];
+                decoder.VtoC[n][k] = decoder.intrinsic_LLR[n][k];
             }
-
         }
-
-
-//        // init Mvc with soft input
-//        for (n=0; n<code.N; n++)
-//        {
-//            for (k=0; k<code.GF; k++)
-//            {
-//                decoder.VtoC[n][k] = decoder.intrinsic_LLR[n][k];
-//            }
-//        }
-
-
-
 
 
 
@@ -287,24 +274,14 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
             numB=0;
             for (node=0; node<code.M; node++) /* Loop for the M Check nodes */
             {
-                /*******************************************************************************************************************/
-                /*******************************************************************************************************************/
-
-
-
-
-
                 for (i=0; i < code.rowDegree[node]; i++)
                 {
                     for (k=0; k < code.GF; k++)
                     {
-
-                        Mvc_temp[i][k] = decoder.APP[code.mat[node][i]][k] - decoder.CtoV[numB+i][k];
+                        Mvc_temp[i][k] = decoder.VtoC[code.mat[node][i]][k];
                         Mvc_temp2[i][k] = Mvc_temp[i][k];
-                        //Mvc_temp[i][k] = decoder.VtoC[code.mat[node][i]][k];
                     }
                 }
-
 
 
                 // sorting Mvc values
@@ -330,14 +307,7 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
                     decoder.M_VtoC_LLR[i][0]=0.0;
                 }
 
-
-
-
                 CheckPassLogEMS (node, &decoder, &code, &table,NbOper,offset);
-
-
-
-
 
                 // compute Mcv_temp
                 for (i=0; i < code.rowDegree[node]; i++)
@@ -349,34 +319,15 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
                 }
 
 
-
-                // save in Mcv FIFO
-                for (i=0; i < code.rowDegree[node]; i++)
-                {
-                    for (k=0; k < code.GF; k++)
-                    {
-                        decoder.CtoV[numB+i][k]=Mcv_temp[i][k];
-                    }
-                }
-
-
                 //compute SO
                 for (i=0; i < code.rowDegree[node]; i++)
                 {
                     for (k=0; k < code.GF; k++)
                     {
                         decoder.APP[code.mat[node][i]][k] = Mcv_temp[i][k] + Mvc_temp[i][k];
+                        decoder.VtoC[code.mat[node][i]][k]= Mcv_temp[i][k] + decoder.intrinsic_LLR[code.mat[node][i]][k];// compute Mvc and save RAM
                     }
-           //         decoder.VtoC[code.mat[node][i]][k]= Mcv_temp[i][k] + decoder.intrinsic_LLR[code.mat[node][i]][k];// compute Mvc and save RAM
                 }
-
-//                    printf(" \n SO = Mcv + Mvc \n ");
-//                    for(k=0; k<code.GF; k++)
-//                    {
-//                     printf("  %f \t + \t %f \t = \t %f \n",Mcv_temp[0][k], Mvc_temp[0][k],decoder.APP[code.mat[node][0]][k] );
-//
-//                    }
-//                    getchar();
 
                 numB=numB+code.rowDegree[node];
 
@@ -413,12 +364,13 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
             if (synd == 0)
                 nbUndetectedErrors ++;
         }
-        printf("\r<%d> FER= %d / %d = %f BER= %d / x = %f  avr_it=%.2f",
+        if (nb%100 ==0)
+        {
+                    printf("\r<%d> FER= %d / %d = %f BER= %d / x = %f  avr_it=%.2f",
                nbUndetectedErrors, nbErroneousFrames, nb,(double)(nbErroneousFrames)/ nb,total_errors,(double)total_errors/(nb*code.K*code.logGF),(double)(sum_it)/nb);
         fflush(stdout);
+        }
 
-//                printf("\r<%d> FER=  %d / %d = %f ",nbUndetectedErrors, nbErroneousFrames, nb,(double)(nbErroneousFrames)/ nb);
-//                fflush(stdout);
 
 
         if (nbErroneousFrames == 40)
@@ -427,10 +379,11 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
 
 
     }
+
+    printf("\r<%d> FER= %d / %d = %f BER= %d / x = %f  avr_it=%.2f",
+    nbUndetectedErrors, nbErroneousFrames, nb,(double)(nbErroneousFrames)/ nb,total_errors,(double)total_errors/(nb*code.K*code.logGF),(double)(sum_it)/nb);
+
     printf(" \n results are printed in file %s \n",file_name);
-
-
-
 
 
 
