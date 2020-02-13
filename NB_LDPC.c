@@ -23,7 +23,8 @@
 
 #include "./include/NB_LDPC.h"
 
-
+//preprocessing directives
+//#define CCSK // use of Code-shift keying modulation
 
 
 
@@ -110,10 +111,16 @@ int main(int argc, char * argv[])
     printf("\n\t Offset           : %g", offset);
     printf("\n\t NbOper           : %d\n",NbOper);
 
+    printf("Load code  ... ");
     LoadCode (FileMatrix, &code);
+    printf(" OK \n Load table ...");
     LoadTables (&table, code.GF, code.logGF);
+    printf("OK \n Allocate decoder ... ");
     AllocateDecoder (&code, &decoder);
+    printf("OK \n Gaussian Elimination ... ");
     GaussianElimination (&code, &table);
+    printf(" OK \n");
+
 
 // output results in a file
     FILE *opfile;
@@ -122,6 +129,24 @@ int main(int argc, char * argv[])
     char file_name [70];
     time_t current_time;
     char* c_time_string;
+
+
+    #ifdef CCSK
+    // CCSK: build CCSK table
+    csk_t csk;
+    //csk.PNsize =code.GF;
+    csk.PNsize =64;
+    printf("\n\t PN is generated using an LFSR \n");
+    allocate_csk(&csk, csk.PNsize);
+    PNGenerator( &csk ); //generate a PN sequence for csk modulation
+    ShiftPN(code.GF, &csk); //fills the csk_arr with shifted versions of PN sequence
+    //csk.PNsize =64;  // for "short" CCSK mapping
+    //build_CSK_map( &code , &csk);
+
+
+    float  quantif_range_int_BPSK; //not used yet
+    float quantif_range_float_BPSK; //not used yet
+    #endif
 
 
     sprintf (file_name,"./data/results_N%d_CR%0.2f_GF%d_IT%d_Offset%0.1f_nm%d_%s.txt",code.N,code.rate,code.GF,NbIterMax, offset,decoder.nbMax,note);
@@ -199,10 +224,31 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
         Encoding (&code, &table, CodeWord, NBIN, KSYMB);
 
         /* Noisy channel (AWGN)*/
-        ModelChannel_AWGN_BPSK (&code, &decoder, &table,  NBIN, EbN,&Idum);
+        #ifdef CCSK
+        ModelChannel_AWGN_BPSK_CSK (&csk,&code, &decoder, &table, CodeWord, EbN,&Idum, quantif_range_int_BPSK, quantif_range_float_BPSK);
+        #endif
+        #ifndef CCSK
+                ModelChannel_AWGN_BPSK (&code, &decoder, &table,  NBIN, EbN,&Idum);
         //ModelChannel_AWGN_64 (&code, &decoder, NBIN, EbN,&Idum);
         //ModelChannel(&code, &decoder,  NBIN, EbN,&Idum);
         //ModelChannel_AWGN_256QAM_4D (&code, &decoder, NBIN, EbN,&Idum);
+        #endif
+
+
+
+//                // init APP with soft input
+//        for (n=0; n<code.N; n++)
+//        {
+//            for (k=0; k<code.GF; k++)
+//            {
+//            printf("%d: %0.2f \n",k, decoder.intrinsic_LLR[n][k]);
+//            }
+//            getchar();
+//
+//        }
+
+
+
 
         numB=0; /* numB is the edge number */
 
