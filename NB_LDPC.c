@@ -236,19 +236,6 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
 
 
 
-//                // init APP with soft input
-//        for (n=0; n<code.N; n++)
-//        {
-//            for (k=0; k<code.GF; k++)
-//            {
-//            printf("%d: %0.2f \n",k, decoder.intrinsic_LLR[n][k]);
-//            }
-//            getchar();
-//
-//        }
-
-
-
 
         numB=0; /* numB is the edge number */
 
@@ -264,6 +251,8 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
                 decoder.CtoV[numB][k]=0;
             }
         }
+
+
         // init APP with soft input
         for (n=0; n<code.N; n++)
         {
@@ -275,23 +264,15 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
         }
 
 
-//                    printf(" \n LLR \n",i);
-//                    for (k=0; k< code.GF; k++)
-//                    {
-//                        printf(" %f \t %d \n ",decoder.intrinsic_LLR[0][k],decoder.intrinsic_GF[0][k] );
-//
-//                    }
-//                getchar();
-//
-//
-//
-//                    printf(" \n APP \n",i);
-//                    for (k=0; k< code.GF; k++)
-//                    {
-//                        printf("%d \t %f \n ",k,decoder.APP[0][k] );
-//
-//                    }
-//                getchar();
+//        // init Mvc with soft input
+//        for (n=0; n<code.N; n++)
+//        {
+//            for (k=0; k<code.GF; k++)
+//            {
+//                decoder.VtoC[n][k] = decoder.intrinsic_LLR[n][k];
+//            }
+//        }
+
 
 
 
@@ -320,21 +301,10 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
 
                         Mvc_temp[i][k] = decoder.APP[code.mat[node][i]][k] - decoder.CtoV[numB+i][k];
                         Mvc_temp2[i][k] = Mvc_temp[i][k];
+                        //Mvc_temp[i][k] = decoder.VtoC[code.mat[node][i]][k];
                     }
                 }
 
-
-//                for (i=0; i < code.rowDegree[node]; i++)
-//                {
-//                    printf(" \n APP read at address %d, Mvc = SO - Mcv \n ",code.mat[node][i]);
-//                    for(k=0; k < code.GF; k++)
-//                    {
-//                     printf(" %f -  %f = %f \n",decoder.APP[code.mat[node][i]][k],decoder.CtoV[numB+i][k],Mvc_temp[i][k]);
-//
-//                    }
-//                    printf(" \n ");
-//                }
-//                    getchar();
 
 
                 // sorting Mvc values
@@ -360,35 +330,13 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
                     decoder.M_VtoC_LLR[i][0]=0.0;
                 }
 
-//                for (i=0; i < code.rowDegree[node]; i++)
-//                {
-//                    printf(" \n sorted Mvc %d\n ",i);
-//                    for(k=0; k<decoder.nbMax; k++)
-//                    {
-//                     printf(" %d \t %f \t %d \n",k,decoder.M_VtoC_LLR[i][k],decoder.M_VtoC_GF[i][k]);
-//
-//                    }
-//                }
-//                    getchar();
+
 
 
                 CheckPassLogEMS (node, &decoder, &code, &table,NbOper,offset);
 
 
 
-
-
-//                //for (i=0; i<code.rowDegree[node]; i++)
-//                //{
-//                i=0;
-//                    printf(" Mcv%d \t node:%d \t iter=%d \n",i, node, iter);
-//                    for (k=0; k<code.GF; k++)
-//                    {
-//                        printf("%d \t %f \t %d \n ",k, decoder.M_CtoV_LLR[i][k],decoder.M_CtoV_GF[i][k] );
-//
-//                    }
-//                //}
-//                getchar();
 
 
                 // compute Mcv_temp
@@ -399,14 +347,6 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
                         Mcv_temp[i][decoder.M_CtoV_GF[i][k]] = decoder.M_CtoV_LLR[i][k];
                     }
                 }
-
-//                    printf(" \n Mcv_temp \n ");
-//                    for(k=0; k<code.GF; k++)
-//                    {
-//                     printf(" %d \t %f \n",k,Mcv_temp[0][k]);
-//
-//                    }
-//                    getchar();
 
 
 
@@ -427,6 +367,7 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
                     {
                         decoder.APP[code.mat[node][i]][k] = Mcv_temp[i][k] + Mvc_temp[i][k];
                     }
+           //         decoder.VtoC[code.mat[node][i]][k]= Mcv_temp[i][k] + decoder.intrinsic_LLR[code.mat[node][i]][k];// compute Mvc and save RAM
                 }
 
 //                    printf(" \n SO = Mcv + Mvc \n ");
