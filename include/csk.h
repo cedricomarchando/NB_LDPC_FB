@@ -491,28 +491,10 @@ void ModelChannel_AWGN_BPSK_CSK (csk_t *csk, code_t *code, decoder_t *decoder, t
 
         }
 
-//        for(k=0; k<code->GF; k++)
-//        {
-//            decoder->intrinsic_LLR[n][k] = TMP[k];
-//        }
-
-
         for(k=0; k<code->GF; k++)
         {
-            decoder->intrinsic_LLR[n][k] = +1e5;
-            decoder->intrinsic_GF[n][k] = -1;
-            for (g=0; g<code->GF; g++)
-            {
-                if (TMP[g] < decoder->intrinsic_LLR[n][k])
-                {
-                    decoder->intrinsic_LLR[n][k] = TMP[g];
-                    decoder->intrinsic_GF[n][k] = g;
-                }
-            }
-            TMP[decoder->intrinsic_GF[n][k]] = +1e5;
+            decoder->intrinsic_LLR[n][k] = TMP[k];
         }
-
-
 
 
 
