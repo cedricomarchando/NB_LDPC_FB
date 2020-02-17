@@ -140,9 +140,8 @@ int main(int argc, char * argv[])
     allocate_csk(&csk, csk.PNsize);
     PNGenerator( &csk ); //generate a PN sequence for csk modulation
     ShiftPN(code.GF, &csk); //fills the csk_arr with shifted versions of PN sequence
-    //csk.PNsize =64;  // for "short" CCSK mapping
-    //build_CSK_map( &code , &csk);
-
+        //build_CSK_map(&code, &csk); //construction of a mapping without PN sequence
+        //csk.PNsize =64;  // for "short" CCSK mapping
 
     float  quantif_range_int_BPSK; //not used yet
     float quantif_range_float_BPSK; //not used yet
