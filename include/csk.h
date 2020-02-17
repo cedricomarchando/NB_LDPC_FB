@@ -22,14 +22,14 @@
 
 Title : csk.h
 csk = code shift keying
-Author : Oussama ABASSI
+Author : Oussama ABASSI & Cedric MARCHAND
 URL : http://www.lab-sticc.fr/
 
 Description :
     - This file includes definition of all tables and functions associated to csk modulation
 
 Created : Thursday February 21, 2011
-Modified : None
+Modified : 2020
 
 IDE: Code::Blocks 10.05
 OS: Ubuntu 10.10
@@ -263,58 +263,50 @@ void ShiftPN(int GF, csk_t *csk)
     fflush(stdout);
 }
 
+// construction of a specific CSK mapping, not based on a PN
 void build_CSK_map(code_t *code, csk_t *csk)
 {
-
-
     //construction of the table
     int tmp1,tmp2,tmp3,tmp4,i,j,k;
 
-
-
-       // construction
-    for (i=0; i<code->GF; i++)
-    {
-        for (j=0; j<csk->PNsize; j++)
-        {
-            //matrix multiplication
-            tmp4=0;
-            for (k=0;k<code->logGF;k++ )
-            {
-
-                //printf(" GF:%d k:%d shiftk:%d  mask:%d  \n", i, k, i>>k, (i>>k) & 0x01 );
-
-                tmp1=(i>>k) & 0x01;
-                tmp2=(j>>k) & 0x01;
-                tmp3=tmp1 & tmp2;
-                tmp4=tmp4 ^ tmp3;
-                //printf(" tmp1:%d  tmp2:%d  tmp3:%d tmp4:%d \n",tmp1, tmp2, tmp3, tmp4 );
-            }
-            csk->CSK_arr[i][j]= BPSK(tmp4);
-        //printf("tmp4:%d, map[%d][%d]=%d", tmp4,i,j, csk->CSK_arr[i][j] );
-        //getchar();
-
-
-        }
-
-    }
-
-
-//       // repeat construction
 //    for (i=0; i<code->GF; i++)
 //    {
-//        for (j=0; j<csk->PNsize / code->logGF; j++)
+//        for (j=0; j<csk->PNsize; j++)
 //        {
+//            //matrix multiplication
+//            tmp4=0;
 //            for (k=0;k<code->logGF;k++ )
 //            {
-//                tmp1=(i>>k) & 0x01;
-//                csk->CSK_arr[i][j*code->logGF + k]= BPSK(tmp1);
-//                //printf(" %d ", tmp1 );
-//            }
-//        }
-//        //getchar();
 //
+//                //printf(" GF:%d k:%d shiftk:%d  mask:%d  \n", i, k, i>>k, (i>>k) & 0x01 );
+//
+//                tmp1=(i>>k) & 0x01;
+//                tmp2=(j>>k) & 0x01;
+//                tmp3=tmp1 & tmp2;
+//                tmp4=tmp4 ^ tmp3;
+//                //printf(" tmp1:%d  tmp2:%d  tmp3:%d tmp4:%d \n",tmp1, tmp2, tmp3, tmp4 );
+//            }
+//            csk->CSK_arr[i][j]= BPSK(tmp4);
+//        //printf("tmp4:%d, map[%d][%d]=%d", tmp4,i,j, csk->CSK_arr[i][j] );
+//        //getchar();
+//        }
 //    }
+
+
+       // repeat construction
+    for (i=0; i<code->GF; i++)
+    {
+        for (j=0; j<csk->PNsize / code->logGF; j++)
+        {
+            for (k=0;k<code->logGF;k++ )
+            {
+                tmp1=(i>>k) & 0x01;
+                //printf("CSK[%d][%d] = %d \n ",i,j*code->logGF + k, tmp1 );
+                csk->CSK_arr[i][j*code->logGF + k]= BPSK(tmp1);
+            }
+        }
+        //getchar();
+    }
 
 
 
@@ -369,19 +361,15 @@ void allocate_csk(csk_t *csk, int GF)
     int i;
 
     //allocate space of memory for CSK_arr[GF][csk_bitsize]
-    csk->CSK_arr = calloc ( GF,sizeof(int *));
-    //csk->CSK_arr[0] = calloc ((size_t) GF*csk->PNsize,sizeof(int));
-    for ( i=0; i<GF; i++ )
+    csk->CSK_arr = calloc(GF,sizeof(int *));
+    csk->CSK_arr[0] = calloc (GF*csk->PNsize,sizeof(int));
+    for ( i=1; i<GF; i++ )
     {
-        //csk->CSK_arr[i] = csk->CSK_arr[0] + i*csk->PNsize;
-        csk->CSK_arr[i] = calloc(csk->PNsize,sizeof(int));
+        csk->CSK_arr[i] = csk->CSK_arr[0] + i*csk->PNsize;
     }
 
-
-
-
     //allocate space of memory for PN[PNsize]
-    csk->PN = calloc((size_t) csk->PNsize, sizeof(int));
+    csk->PN = calloc( csk->PNsize, sizeof(int));
     printf("Allocate memory space for CSK structure: Success\n");
     fflush(stdout);
 
