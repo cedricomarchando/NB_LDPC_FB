@@ -23,9 +23,9 @@
 
 #include "./include/NB_LDPC.h"
 
-//preprocessing directives
+/// preprocessing directives
 //#define CCSK // use of Code-shift keying modulation
-
+//#define stat_ecn
 
 
 /*!
@@ -135,13 +135,13 @@ int main(int argc, char * argv[])
     // CCSK: build CCSK table
     csk_t csk;
     //csk.PNsize =code.GF;
-    csk.PNsize =64;
+    csk.PNsize =1024;
     printf("\n\t PN is generated using an LFSR \n");
     allocate_csk(&csk, csk.PNsize);
     PNGenerator( &csk ); //generate a PN sequence for csk modulation
     ShiftPN(code.GF, &csk); //fills the csk_arr with shifted versions of PN sequence
         //build_CSK_map(&code, &csk); //construction of a mapping without PN sequence
-        //csk.PNsize =64;  // for "short" CCSK mapping
+        csk.PNsize =32;  // for "short" CCSK mapping
 
     float  quantif_range_int_BPSK; //not used yet
     float quantif_range_float_BPSK; //not used yet
@@ -171,12 +171,16 @@ int main(int argc, char * argv[])
 
     decide=(int *)calloc(code.N,sizeof(int));
 
-int stat_on = 20; // o if no stat , else ECN size, (nbMax)
-int stat_bubble[ 3 * (code.rowDegree[0]-2) * stat_on * stat_on ];
+
+#ifdef stat_ecn
+int stat_on = 0; // 0 if no stat , else ECN size, (decoder.nbMax)
+int stat_bubble[ 3 * (code.rowDegree[0]-2) * stat_on * stat_on ];// FWBF
 for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
 {
     stat_bubble[i]=0;
 }
+#endif
+
 
     // check that dc is constant
     int dc_min=100;
@@ -306,7 +310,11 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
                     decoder.M_VtoC_LLR[i][0]=0.0;
                 }
 
-                CheckPassLogEMS (node, &decoder, &code, &table,NbOper,offset);
+
+
+                //CheckPassLogEMS (node, &decoder, &code, &table,NbOper,offset);
+                CheckPassLogEMS_dc3(node, &decoder, &code, &table,NbOper,offset);
+
 
                 // compute Mcv_temp
                 for (i=0; i < code.rowDegree[node]; i++)
