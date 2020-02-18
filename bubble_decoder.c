@@ -250,9 +250,7 @@ void CheckPassLogEMS (int node,decoder_t *decoder, code_t *code, table_t *table,
         {
             //decoder->M_CtoV_GF[t][k]=table->DIVGF[decoder->M_CtoV_GF[t][k]][code->matValue[node][t]];
             decoder->M_CtoV_GF[t][k]=table->DIVDEC[decoder->M_CtoV_GF[t][k]][code->matValue[node][t]];
-
         }
-
 
 /// reorder in GF order and add offset
 //printf("sat=%0.3f \n", decoder->M_CtoV_LLR[t][Stp-1] + offset );
@@ -282,7 +280,8 @@ void CheckPassLogEMS (int node,decoder_t *decoder, code_t *code, table_t *table,
 
 //    for(g=0; g<code->GF; g++)
 //        {
-//            printf(" GF=%d, LLR=%0.2f \n",decoder->M_CtoV_GF[0][g],decoder->M_CtoV_LLR[0][g]  );
+//                        printf(" GF=%d, LLR=%0.2f \t GF=%d, LLR=%0.2f \t GF=%d, LLR=%0.2f  \n",decoder->M_CtoV_GF[0][g],decoder->M_CtoV_LLR[0][g] ,
+//                    decoder->M_CtoV_GF[1][g],decoder->M_CtoV_LLR[1][g],decoder->M_CtoV_GF[2][g],decoder->M_CtoV_LLR[2][g]);
 //        }
 //        getchar();
 
@@ -303,6 +302,112 @@ void CheckPassLogEMS (int node,decoder_t *decoder, code_t *code, table_t *table,
     free(OutBackwardIndice1);
 
 }
+
+
+
+
+
+
+/**
+ * \fn CheckPassLogEMS
+ * \brief Process the Check to Variable messages in the decoding graph.
+ * Inputs
+ * 	- decoder->VtoC
+ * Outputs
+ * 	- decoder->CtoV
+ */
+void CheckPassLogEMS_dc3 (int node,decoder_t *decoder, code_t *code, table_t *table,int NbOper, float offset)
+{
+    const int nbMax = decoder->nbMax;
+    int   t,c,k,Stp;
+    float LLR_tmp[code->GF];
+
+//Rotation par la valeur non nulle dans la matrice pour VtoC
+    for(t=0; t<code->rowDegree[node]; t++)
+    {
+        //printf("\n node=%d, coef=%d \n",node,code->matValue[node][t] );
+        for(k=0; k<nbMax; k++)
+        {
+            //printf(" %d ->",decoder->M_VtoC_GF[t][k]);
+            if (decoder->M_VtoC_GF[t][k]!=-1)
+            {
+                c=decoder->M_VtoC_GF[t][k];
+                // GF multiplication and output decimal
+                c=table->MULDEC[c][code->matValue[node][t]];
+                decoder->M_VtoC_GF[t][k] =c;
+            }
+            else printf("M_VtoC_GF[%d][%d]=%d\n",t,k,decoder->M_VtoC_GF[t][k]);
+            //printf(" %d ->",decoder->M_VtoC_GF[t][k]);
+        }
+    }
+
+
+
+ ElementaryStep(decoder->M_VtoC_LLR[0],decoder->M_VtoC_LLR[1],decoder->M_VtoC_GF[0],decoder->M_VtoC_GF[1],decoder->M_CtoV_LLR[2],decoder->M_CtoV_GF[2],table->ADDGF,code->GF,nbMax,NbOper); // forward
+ ElementaryStep(decoder->M_VtoC_LLR[1],decoder->M_VtoC_LLR[2],decoder->M_VtoC_GF[1],decoder->M_VtoC_GF[2],decoder->M_CtoV_LLR[0],decoder->M_CtoV_GF[0],table->ADDGF,code->GF,nbMax,NbOper); // backward
+ ElementaryStep(decoder->M_VtoC_LLR[0],decoder->M_VtoC_LLR[2],decoder->M_VtoC_GF[0],decoder->M_VtoC_GF[2],decoder->M_CtoV_LLR[1],decoder->M_CtoV_GF[1],table->ADDGF,code->GF,nbMax,NbOper); // merge
+
+
+//Rotation par la valeur non nulle dans la matrice pour CtoV
+    for(t=0; t<code->rowDegree[node]; t++)
+    {
+        for(k=0; k<nbMax; k++)
+        {
+
+            if (decoder->M_CtoV_GF[t][k]== -1)
+            {
+                Stp=k;
+                break;
+            }
+            else
+                Stp=nbMax;
+        }
+
+        // back to GF symbol and devise
+        for(k=0; k<Stp; k++)
+        {
+            //decoder->M_CtoV_GF[t][k]=table->DIVGF[decoder->M_CtoV_GF[t][k]][code->matValue[node][t]];
+            decoder->M_CtoV_GF[t][k]=table->DIVDEC[decoder->M_CtoV_GF[t][k]][code->matValue[node][t]];
+
+        }
+
+
+/// reorder in GF order and add offset
+//printf("sat=%0.3f \n", decoder->M_CtoV_LLR[t][Stp-1] + offset );
+//getchar();
+
+
+        for(k=0; k<code->GF; k++)
+        {
+            LLR_tmp[k] = decoder->M_CtoV_LLR[t][Stp-1] + offset;
+        }
+
+        for(k=0; k<Stp; k++)
+        {
+            LLR_tmp[decoder->M_CtoV_GF[t][k]]= decoder->M_CtoV_LLR[t][k];
+        }
+
+
+        for(k=0; k<code->GF; k++)
+        {
+            decoder->M_CtoV_GF[t][k] = k;
+            decoder->M_CtoV_LLR[t][k] = LLR_tmp[k];
+        }
+
+    }
+
+//    for(g=0; g<code->GF; g++)
+//        {
+//            printf(" GF=%d, LLR=%0.2f \t GF=%d, LLR=%0.2f \t GF=%d, LLR=%0.2f  \n",decoder->M_CtoV_GF[0][g],decoder->M_CtoV_LLR[0][g] ,
+//                    decoder->M_CtoV_GF[1][g],decoder->M_CtoV_LLR[1][g],decoder->M_CtoV_GF[2][g],decoder->M_CtoV_LLR[2][g]);
+//        }
+//        getchar();
+
+
+}
+
+
+
 
 
 
@@ -593,8 +698,6 @@ break;
 
 return(0);
 }
-
-
 
 
 
