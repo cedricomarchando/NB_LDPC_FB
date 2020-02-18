@@ -127,7 +127,9 @@ int main(int argc, char * argv[])
     char note[40]="FB30";
     printf("\n\t Note             : %s\n",note);
     char file_name [70];
-    time_t current_time;
+    time_t start_time;
+    time_t end_time;
+    double exec_time;
     char* c_time_string;
 
 
@@ -152,8 +154,8 @@ int main(int argc, char * argv[])
 //sprintf (file_name,"./data/results_N%d_GF%d_IT%d_nm%d_%s.txt",code.N,code.GF,NbIterMax,decoder.nbMax,note);
 
 
-    current_time = time(NULL);
-    c_time_string = ctime(&current_time);
+    start_time = time(NULL);
+    c_time_string = ctime(&start_time);
     printf("Simulation started at time: %s \n", c_time_string);
 
 
@@ -210,7 +212,6 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
 
     softdata_t Mvc_temp[dc_max][code.GF];
     softdata_t Mvc_temp2[dc_max][code.GF];
-    softdata_t Mcv_temp[dc_max][code.GF+1];
     sum_it=0;
 
 
@@ -316,23 +317,13 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
                 CheckPassLogEMS_dc3(node, &decoder, &code, &table,NbOper,offset);
 
 
-                // compute Mcv_temp
-                for (i=0; i < code.rowDegree[node]; i++)
-                {
-                    for (k=0; k < code.GF; k++)
-                    {
-                        Mcv_temp[i][decoder.M_CtoV_GF[i][k]] = decoder.M_CtoV_LLR[i][k];
-                    }
-                }
-
-
                 //compute SO
                 for (i=0; i < code.rowDegree[node]; i++)
                 {
                     for (k=0; k < code.GF; k++)
                     {
-                        decoder.APP[code.mat[node][i]][k] = Mcv_temp[i][k] + Mvc_temp[i][k];
-                        decoder.VtoC[code.mat[node][i]][k]= Mcv_temp[i][k] + decoder.intrinsic_LLR[code.mat[node][i]][k];// compute Mvc and save RAM
+                        decoder.APP[code.mat[node][i]][k] = decoder.M_CtoV_LLR[i][k] + Mvc_temp[i][k];
+                        decoder.VtoC[code.mat[node][i]][k]= decoder.M_CtoV_LLR[i][k] + decoder.intrinsic_LLR[code.mat[node][i]][k];// compute Mvc and save RAM
                     }
                 }
 
@@ -380,7 +371,7 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
 
 
 
-        if (nbErroneousFrames == 40)
+        if (nbErroneousFrames == 20)
             break;
 
 
@@ -394,9 +385,9 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
 
 
 
-    current_time = time(NULL);
-    c_time_string = ctime(&current_time);
-
+    end_time = time(NULL);
+    c_time_string = ctime(&end_time);
+    exec_time = difftime(end_time,start_time);
     opfile=fopen(file_name,"a");
 //opfile=fopen("./data/results.txt","a");
     if ((opfile)==NULL)
@@ -414,6 +405,9 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
 
     printf("\n");
     printf("Simulation complete at time: %s", c_time_string);
+
+    printf("execution time:%0.2f",exec_time);
+
     getchar();
 
     free(FileName);
