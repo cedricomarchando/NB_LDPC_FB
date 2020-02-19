@@ -20,6 +20,7 @@ void CheckPassLogEMS_dc3 (int node,decoder_t *decoder, code_t *code, table_t *ta
 
 
 int ElementaryStep(float *Input1,float *Input2,int *IndiceInput1,int *IndiceInput2,float *Output,int *IndiceOut,int **ADDGF,int GF,int nbMax,int nbOper);
+int ElementaryStep_nm(float *Input1,float *Input2,int *IndiceInput1,int *IndiceInput2,float *Output,int *IndiceOut,int **ADDGF,int GF,int nmU,int nmV,int nmS,int nbOper);
 
 
 

@@ -242,8 +242,9 @@ void ShiftPN(int GF, csk_t *csk)
 void build_CSK_map(code_t *code, csk_t *csk)
 {
     //construction of the table
-    int tmp1,tmp2,tmp3,tmp4,i,j,k;
+    int tmp1,i,j,k;
 
+// int tmp1,tmp2,tmp3,tmp4
 //    for (i=0; i<code->GF; i++)
 //    {
 //        for (j=0; j<csk->PNsize; j++)
@@ -379,7 +380,6 @@ void free_csk(csk_t *csk)
 void ModelChannel_AWGN_BPSK_CSK (csk_t *csk, code_t *code, decoder_t *decoder, table_t *table, int *CodeWord, float EbN,int *init_rand, float quantif_range_int,float quantif_range_float)
 {
     const int N = code->N;
-    const int GF = code->GF;
     int n,k,g,q;
     float u,v,sigma;
     float TMP[code->GF];
