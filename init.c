@@ -426,16 +426,8 @@ void AllocateDecoder (code_t *code, decoder_t *decoder)
     decoder->N 		= code->N;
 
     nbRow = code->nbBranch;
-    nbCol = decoder->nbMax;
+    nbCol = decoder->n_vc;
     nbRow_arr=code->rowDegree[0];
-
-
-    /* CtoV [nbBranch][nbMax] */
-    decoder->CtoV =calloc((size_t)nbRow,sizeof(softdata_t *));
-    //if (decoder->CtoV  == NULL) err(EXIT_FAILURE,"%s:%d > malloc failed !",__FILE__,__LINE__);
-    decoder->CtoV [0] = calloc((size_t)nbRow*code->GF,sizeof(softdata_t));
-    //if (decoder->CtoV [0] == NULL) err(EXIT_FAILURE,"%s:%d > malloc failed !",__FILE__,__LINE__);
-    for (k=1; k<nbRow; k++) decoder->CtoV[k] = decoder->CtoV[0] + k*code->GF;
 
 
     /* VtoC [nbBranch][nbMax] */
@@ -513,8 +505,6 @@ void AllocateDecoder (code_t *code, decoder_t *decoder)
  */
 void FreeDecoder (decoder_t *decoder)
 {
-    free(decoder->CtoV[0] );
-    free(decoder->CtoV);
     free(decoder->M_CtoV_LLR[0] );
     free(decoder->M_CtoV_LLR);
     free(decoder->M_VtoC_LLR[0] );
