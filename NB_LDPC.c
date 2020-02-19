@@ -38,7 +38,8 @@
  *		NbIterMax        : # of maximum decoding iteration
  *		FileMatrix       : File name of the parity-check matrix
  *		EbN              : Eb/No (dB)
- *		NbMax            : size of truncated messages
+ *		n_vc             : size of truncated messages from Variable to Check
+ *      n_cv             : size of truncated messages from Check to Variable
  *		Offset           : offset correction factor (0.4 -- 1)
  *		NbOper           : Maximum number of operations for sorting
  * Output
@@ -51,7 +52,7 @@
  compile using make
  then Run the executable with the following parameters
 
-./essai 2000 10 ./matrices/KN/N576_K480_GF64.txt 3.5 20 0.3 25
+./essai 2000 10 ./matrices/KN/N576_K480_GF64.txt 3.5 10 20 0.3 25
 
 giving
 
@@ -75,7 +76,7 @@ int main(int argc, char * argv[])
     table_t table;
     decoder_t decoder;
 
-    int node,numB ;
+    int node;
 
     int Idum=-1; // initialization of random generator
     srand(5);
@@ -98,16 +99,18 @@ int main(int argc, char * argv[])
     NbIterMax 		= atoi(argv[2]);
     strcpy(FileMatrix,argv[3]);
     EbN 			= atof(argv[4]);
-    decoder.nbMax 		= atoi(argv[5]);
-    offset  		= atof(argv[6]);
-    NbOper  		= atoi(argv[7]);
+    decoder.n_vc 	= atoi(argv[5]);
+    decoder.n_cv 	= atoi(argv[6]);
+    offset  		= atof(argv[7]);
+    NbOper  		= atoi(argv[8]);
     printf(" Monte-Carlo simulation of Non-Binary LDPC decoder \n\n");
     printf("Simulation parameters:\n");
     printf("\n\t NbMonteCarlo     : %d", NbMonteCarlo);
     printf("\n\t NbIterMax        : %d", NbIterMax);
     printf("\n\t FileMatrix       : %s", FileMatrix);
     printf("\n\t Eb/No (dB)       : %g", EbN);
-    printf("\n\t NbMax            : %d", decoder.nbMax);
+    printf("\n\t n_vc            : %d", decoder.n_vc);
+    printf("\n\t n_cv            : %d", decoder.n_cv);
     printf("\n\t Offset           : %g", offset);
     printf("\n\t NbOper           : %d\n",NbOper);
 
@@ -150,7 +153,7 @@ int main(int argc, char * argv[])
     #endif
 
 
-    sprintf (file_name,"./data/results_N%d_CR%0.2f_GF%d_IT%d_Offset%0.1f_nm%d_%s.txt",code.N,code.rate,code.GF,NbIterMax, offset,decoder.nbMax,note);
+    sprintf (file_name,"./data/results_N%d_CR%0.2f_GF%d_IT%d_Offset%0.1f_nm%d_%s.txt",code.N,code.rate,code.GF,NbIterMax, offset,decoder.n_cv,note);
 //sprintf (file_name,"./data/results_N%d_GF%d_IT%d_nm%d_%s.txt",code.N,code.GF,NbIterMax,decoder.nbMax,note);
 
 
@@ -205,7 +208,6 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
 
 
     int sum_it;
-    int n_cv = NbOper;
 
 
 //    getchar();
@@ -240,23 +242,8 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
 
 
 
-
-        numB=0; /* numB is the edge number */
-
-
         /***********************************************/
         /* Implementation of the horizontal scheduling */
-
-        /* initialisation step : init all Mcv with 0 */
-        for (numB=0; numB<code.nbBranch; numB++)
-        {
-            for(k=0; k<code.GF; k++)
-            {
-                decoder.CtoV[numB][k]=0;
-            }
-        }
-
-
 
         // init Mvc with intrinsic
         for (n=0; n<code.N; n++)
@@ -273,9 +260,6 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
         for (iter=0; iter < NbIterMax - 1; iter++)
         {
 
-//if (iter>10){stat_on=1;}else{stat_on=0;}
-
-            numB=0;
             for (node=0; node<code.M; node++) /* Loop for the M Check nodes */
             {
                 for (i=0; i < code.rowDegree[node]; i++)
@@ -291,7 +275,7 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
                 // sorting Mvc values
                 for (i=0; i < code.rowDegree[node]; i++)
                 {
-                    for(k=0; k<decoder.nbMax; k++)
+                    for(k=0; k<decoder.n_vc; k++)
                     {
                         decoder.M_VtoC_LLR[i][k]=+1e5;
                         decoder.M_VtoC_GF[i][k]=0;
@@ -307,7 +291,7 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
                     }
 
                     // Normalisation  */
-                    for(g=1; g<decoder.nbMax; g++) decoder.M_VtoC_LLR[i][g]= decoder.M_VtoC_LLR[i][g]-decoder.M_VtoC_LLR[i][0];
+                    for(g=1; g<decoder.n_vc; g++) decoder.M_VtoC_LLR[i][g]= decoder.M_VtoC_LLR[i][g]-decoder.M_VtoC_LLR[i][0];
                     decoder.M_VtoC_LLR[i][0]=0.0;
                 }
 
@@ -326,8 +310,6 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
                         decoder.VtoC[code.mat[node][i]][k]= decoder.M_CtoV_LLR[i][k] + decoder.intrinsic_LLR[code.mat[node][i]][k];// compute Mvc and save RAM
                     }
                 }
-
-                numB=numB+code.rowDegree[node];
 
 
                 /*******************************************************************************************************************/
@@ -371,7 +353,7 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
 
 
 
-        if (nbErroneousFrames == 20)
+        if (nbErroneousFrames == 40)
             break;
 
 
