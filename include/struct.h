@@ -93,8 +93,8 @@ typedef float softdata_t ; /* la fiabilité d'un message est de type float */
 typedef struct
 {
     int N;
-    int nbMax; /* c'est le paramètre nm dans l'algo EMS : Au lieu de transmettre les q symbole dans GF(q), on fait une trancature et on transmet
-				uniquement les nm plus fiables symboles */
+    int n_cv; /* only the n_cv most reliable GF are transmitted from Check Node to Variable Node  */
+    int n_vc; /* only the n_vc most reliable GF are transmitted from Check Node to Variable Node  */
     int nbBranch; /* nombre de branches dans le graphe de Tanner */
     softdata_t 	**CtoV;		/* An array to store the nbMax largest Check_to_Variable reliabilities for all edges on the graph
 							CtoV Array size = (nbBranch x nbMax) */
