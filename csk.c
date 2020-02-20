@@ -148,7 +148,7 @@ void PNGenerator( csk_t *csk)
         }
 
 
-// For GF(2048) with polynomial P(x)=X^10+X^2+1
+// For GF(2048) with polynomial P(x)=X^11+X^2+1
         if(csk->PNsize == 2048)
         {
                     a=1024;
@@ -168,7 +168,7 @@ void PNGenerator( csk_t *csk)
 
 
 
-// For GF(4096) with polynomial P(x)=X^12+X^3+1
+// For GF(4096) with polynomial P(x)=X^12+X^9+X^7+X^6+1
         if(csk->PNsize == 4096)
         {
                     a=2048;
@@ -180,7 +180,7 @@ void PNGenerator( csk_t *csk)
 
                 LowBit = LowBit ^ (a >> 8); //x**9 term
                 LowBit = LowBit ^ (a >> 6); //x**7 term
-                LowBit = LowBit ^ (a >> 1); //x**2 term
+                LowBit = LowBit ^ (a >> 5); //x**6 term
                 LowBit = LowBit ^ (a); //x term
 
 
