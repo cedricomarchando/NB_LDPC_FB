@@ -37,7 +37,7 @@
 void Table_Add_GF(table_t *table, int GF, int logGF)
 {
     int i,j,k;
-    int temp[8];
+    int temp[12];
 
     for(j=0; j<GF; j++)
     {
@@ -49,6 +49,7 @@ void Table_Add_GF(table_t *table, int GF, int logGF)
             }
             table->ADDGF[j][k] = Bin2GF(temp,GF,logGF,table->BINGF);
         }
+        printf("%d",j);
     }
 }
 
@@ -537,7 +538,7 @@ void LoadTables (table_t *table, int GF, int logGF)
 {
     int nbRow, nbCol, g,k,l;
 
-    if(GF!=16 && GF!=32 && GF!=64 && GF!=256)
+    if(GF!=16 && GF!=32 && GF!=64 && GF!=256 && GF!=4096)
     {
         printf("The binary image of GF(%d) is not available in this version of the program. Please try GF(64) or GF(256)\n",GF);
         exit(EXIT_FAILURE);
@@ -590,8 +591,6 @@ void LoadTables (table_t *table, int GF, int logGF)
     table->DIVDEC [0] = calloc((size_t)nbRow*nbCol,sizeof(int));
     for (k=1; k<nbRow; k++) table->DIVDEC[k] = table->DIVDEC[0] + k*nbCol;
 
-
-
     if(GF==16)
     {
         for(g=0; g<GF; g++)
@@ -630,16 +629,25 @@ void LoadTables (table_t *table, int GF, int logGF)
     }
 
 
+    if(GF==4096)
+    {
+        for(g=0; g<GF; g++)
+            for(l=0; l<logGF; l++)
+                table->BINGF[g][l] = BinGF_4096[g][l];
+        //printf("Loading of the binary image of GF(256): Success\n");
+        //fflush(stdout);
+    }
+
+
     /*
      * Build the addition, multiplication and division tables (corresponding to GF[q])
      */
-    Table_Add_GF (table,GF,logGF);
+   // Table_Add_GF(table,GF,logGF);
     Table_dec_GF(table, GF,logGF);
     Table_Mul_GF (table->MULGF,GF);
     Table_Div_GF (table->DIVGF,GF);
     Table_Mul_DEC(table,GF);
     Table_Div_DEC(table,GF);
-
 }
 
 
