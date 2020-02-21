@@ -153,6 +153,8 @@ void GaussianElimination (code_t *code, table_t *table)
     const int N = code->N;
     const int M = code->M;
     int n,m,k,m1,ind, buf;
+    int temp[12];
+    int i;
 
     code->matUT = calloc((size_t)M,sizeof(int *));
     //if (code->matUT == NULL) err(EXIT_FAILURE,"%s:%d > malloc failed !",__FILE__,__LINE__);
@@ -210,7 +212,13 @@ void GaussianElimination (code_t *code, table_t *table)
                 }
                 for (n=m; n<N; n++)
                 {
-                    code->matUT[m1][n] = table->ADDGF[code->matUT[m1][n]][code->matUT[m][n]];
+                                for(i=0; i<code->logGF; i++)
+                                {
+                                    temp[i] = (table->BINGF[code->matUT[m1][n]][i])^(table->BINGF[code->matUT[m][n]][i]);
+                                }
+                                code->matUT[m1][n] = Bin2GF(temp,code->GF,code->logGF,table->BINGF);
+
+                    //code->matUT[m1][n] = table->ADDGF[code->matUT[m1][n]][code->matUT[m][n]];
                 }
             }
         }
@@ -229,13 +237,15 @@ void GaussianElimination (code_t *code, table_t *table)
  *      - Codeword
  *      - NBIN : binary copy of the codeword
  */
-int Encoding (code_t *code, table_t *table, int *CodeWord, int **NBIN, int *KSYMB)
+int Encoding(code_t *code, table_t *table, int *CodeWord, int **NBIN, int *KSYMB)
 {
     const int N = code->N;
     const int M = code->M;
     const int logGF = code->logGF;
     int k,n,m,q,buf;
     int NSYMB[N];
+    int temp[12];
+    int i;
 
     for (k=0 ; k<N-M; k++)
         NSYMB[M+k]=KSYMB[k];
@@ -247,7 +257,14 @@ int Encoding (code_t *code, table_t *table, int *CodeWord, int **NBIN, int *KSYM
         for (n=m+1; n<N; n++)
         {
             if (code->matUT[m][n]!=0)
-                buf = table->ADDGF[buf][table->MULGF[code->matUT[m][n]][NSYMB[n]]];
+            {
+                for(i=0; i<code->logGF; i++)
+                {
+                    temp[i] = (table->BINGF[buf][i])^(table->BINGF[table->MULGF[code->matUT[m][n]][NSYMB[n]]][i]);
+                }
+                buf = Bin2GF(temp,code->GF,code->logGF,table->BINGF);
+              //  buf = table->ADDGF[buf][table->MULGF[code->matUT[m][n]][NSYMB[n]]];
+            }
         }
         /* Systematic codeword (interleaved) */
         NSYMB[m] = table->DIVGF[buf][code->matUT[m][m]];
@@ -285,12 +302,23 @@ int Syndrom (code_t *code, int *decide, table_t *tableGF)
 {
     int k,l;
     int synd;
+    int temp[12];
+    int i;
 
     synd = 0;
     for (k=0; k<code->M; k++)
     {
         for (l=0; l<code->rowDegree[k]; l++)
-            synd = tableGF->ADDGF[synd][tableGF->MULGF[code->matValue[k][l]][decide[code->mat[k][l]]]];
+        {
+
+            for(i=0; i<code->logGF; i++)
+            {
+                temp[i] = (tableGF->BINGF[synd][i])^(tableGF->BINGF[tableGF->MULGF[code->matValue[k][l]][decide[code->mat[k][l]]]][i]);
+            }
+            synd = Bin2GF(temp,code->GF,code->logGF,tableGF->BINGF);
+            //synd = tableGF->ADDGF[synd][tableGF->MULGF[code->matValue[k][l]][decide[code->mat[k][l]]]];
+        }
+
         if (synd != 0)
             break;
     }
