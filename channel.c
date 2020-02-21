@@ -41,7 +41,7 @@ void ModelChannel_AWGN_BPSK (code_t *code, decoder_t *decoder, table_t *table, i
     const int logGF = code->logGF;
     int n,k,g,q;
     float u,v,sigma;
-    float TMP[256];
+    float TMP[4096];
 
     float **NoisyBin = calloc(N,sizeof(float *));
     for (n=0; n<N; n++) NoisyBin[n] = calloc(logGF,sizeof(float));
