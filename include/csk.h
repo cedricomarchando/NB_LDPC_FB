@@ -16,7 +16,9 @@ typedef struct
 
 void PNGenerator( csk_t *csk);
 
-void ShiftPN(int GF, csk_t *csk);
+void build_natural_csk_mapping(int GF, csk_t *csk);
+
+void build_punctured_csk_mapping(int GF,int logGF, csk_t *csk, int **BINGF);
 
 void build_CSK_map(code_t *code, csk_t *csk);
 
@@ -27,6 +29,7 @@ void allocate_csk(csk_t *csk, int GF);
 void free_csk(csk_t *csk);
 
 void ModelChannel_AWGN_BPSK_CSK (csk_t *csk, code_t *code, decoder_t *decoder, table_t *table, int *CodeWord, float EbN,int *init_rand, float quantif_range_int,float quantif_range_float);
+
 
 
 

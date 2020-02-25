@@ -24,7 +24,7 @@
 #include "./include/NB_LDPC.h"
 
 /// preprocessing directives
-//#define CCSK // use of Code-shift keying modulation
+#define CCSK // use of Code-shift keying modulation
 //#define stat_ecn
 
 
@@ -140,13 +140,16 @@ int main(int argc, char * argv[])
     // CCSK: build CCSK table
     csk_t csk;
     //csk.PNsize =code.GF;
-    csk.PNsize =1024;
+    csk.PNsize =4096;
     printf("\n\t PN is generated using an LFSR \n");
     allocate_csk(&csk, csk.PNsize);
     PNGenerator( &csk ); //generate a PN sequence for csk modulation
-    ShiftPN(code.GF, &csk); //fills the csk_arr with shifted versions of PN sequence
-        //build_CSK_map(&code, &csk); //construction of a mapping without PN sequence
-        csk.PNsize =32;  // for "short" CCSK mapping
+    //build_natural_csk_mapping(code.GF, &csk); //fills the csk_arr with shifted versions of PN sequence
+    build_punctured_csk_mapping(code.GF,code.logGF, &csk, table.BINGF);
+    //build_CSK_map(&code, &csk); //construction of a mapping without PN sequence
+
+
+    csk.PNsize =8;  // for "short" CCSK mapping
 
     float  quantif_range_int_BPSK; //not used yet
     float quantif_range_float_BPSK; //not used yet
@@ -154,7 +157,6 @@ int main(int argc, char * argv[])
 
 
     sprintf (file_name,"./data/results_N%d_CR%0.2f_GF%d_IT%d_Offset%0.1f_nm%d_%s.txt",code.N,code.rate,code.GF,NbIterMax, offset,decoder.n_cv,note);
-//sprintf (file_name,"./data/results_N%d_GF%d_IT%d_nm%d_%s.txt",code.N,code.GF,NbIterMax,decoder.nbMax,note);
 
 
     start_time = time(NULL);
@@ -241,7 +243,6 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
         #endif
 
 
-
         /***********************************************/
         /* Implementation of the horizontal scheduling */
 
@@ -291,14 +292,19 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
                     }
 
                     // Normalisation  */
-                    for(g=1; g<decoder.n_vc; g++) decoder.M_VtoC_LLR[i][g]= decoder.M_VtoC_LLR[i][g]-decoder.M_VtoC_LLR[i][0];
+                    for(g=1; g<decoder.n_vc; g++)
+                        {
+                            decoder.M_VtoC_LLR[i][g]= decoder.M_VtoC_LLR[i][g]-decoder.M_VtoC_LLR[i][0];
+                            //printf(" GF:%d  LLR:%0.2f \n",decoder.M_VtoC_GF[i][g],decoder.M_VtoC_LLR[i][g] );
+                        }
+                        //getchar();
                     decoder.M_VtoC_LLR[i][0]=0.0;
                 }
 
 
 
-                //CheckPassLogEMS (node, &decoder, &code, &table,NbOper,offset);
-                CheckPassLogEMS_dc3(node, &decoder, &code, &table,NbOper,offset);
+                CheckPassLogEMS (node, &decoder, &code, &table,NbOper,offset);
+                //CheckPassLogEMS_dc3(node, &decoder, &code, &table,NbOper,offset);
 
 
                 //compute SO
