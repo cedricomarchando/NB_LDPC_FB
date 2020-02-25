@@ -191,10 +191,6 @@ void PNGenerator( csk_t *csk)
             }
         }
 
-
-
-
-
     printf(" \n PN generation: Success\n");
 
 }
@@ -207,7 +203,7 @@ Arguments:
     - csk : structure describing csk modulation parameters
 Return: void
 */
-void ShiftPN(int GF, csk_t *csk)
+void build_natural_csk_mapping(int GF, csk_t *csk)
 {
     int i, j;
 
@@ -227,16 +223,63 @@ void ShiftPN(int GF, csk_t *csk)
         for (j=0; j<csk->PNsize; j++)
         {
             csk->CSK_arr[i][j]=csk->CSK_arr[i-1][(j+1)%csk->PNsize];
-            //printf("%d ",csk->CSK_arr[i][j] );
-        }
+            //printf("%d ",(csk->CSK_arr[i][j]+1)/2 );
 
+        }
+        //printf(" \n ");
     }
-//printf(" \n ");
+
 
     //getchar();
     printf("Filling CSK_arr: Success\n");
     fflush(stdout);
 }
+
+
+// search in the csk array the GF indices giving first logGF bits that are different
+void build_punctured_csk_mapping(int GF,int logGF, csk_t *csk, int **BINGF)
+{
+    int i, j;
+    int bin_temp[12];
+    int GF_temp;
+    int GF_selected[GF];
+    int PN_index =0;
+
+    for (j=0; j<GF; j++) {GF_selected[j]= 0;}
+
+
+    for (i=0; i<csk->PNsize; i++)
+    { //printf(" \n %d:",i);
+
+        for (j=0; j<logGF; j++)
+        {
+            bin_temp[j]=(csk->PN[(j+i)%csk->PNsize] +1)/2;
+            //printf("%d ",bin_temp[j]);
+        }
+        GF_temp = Bin2GF(bin_temp,GF,logGF,BINGF);
+        //printf(" GF_temp: %d", GF_temp ); getchar();
+        if (GF_selected[GF_temp]==0)
+        {
+            for (j=0; j<csk->PNsize; j++)
+            {
+                csk->CSK_arr[PN_index][j] = csk->PN[(j+i)%csk->PNsize];
+            }
+            GF_selected[GF_temp]=1;
+            //printf("CSK_index: %d \t GF_temp:%d \t PN_index:%d ",i,GF_temp,PN_index); getchar();
+            PN_index = PN_index + 1;
+        }
+        //printf(" \n ");
+    }
+
+
+    //getchar();
+    printf("build_punctured_mapping: Success\n");
+    fflush(stdout);
+}
+
+
+
+
 
 // construction of a specific CSK mapping, not based on a PN
 void build_CSK_map(code_t *code, csk_t *csk)
