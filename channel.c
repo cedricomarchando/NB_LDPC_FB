@@ -17,13 +17,13 @@
 
 #define PI 3.1415926536
 
-//#define APSK
+#define APSK
 //#define QAM
-#define QAM_R //rotated QAM
+//#define QAM_R //rotated QAM
 
 //#define rayleigh_fading
-#define rayleigh_fading_SSD
-#define erasure
+//#define rayleigh_fading_SSD
+//#define erasure
 
 /*!
  * \fn void ModelChannel_AWGN_BPSK (code_t *code, decoder_t *decoder, table_t *table, int **NBIN, float EbN,int *init_rand)
@@ -54,7 +54,12 @@ void ModelChannel_AWGN_BPSK (code_t *code, decoder_t *decoder, table_t *table, i
     {
         for (q=0; q<logGF; q++)
         {
+
             u=My_drand48(init_rand);
+            while(u==0.0)
+			{
+                u=My_drand48(init_rand);
+			}
             v=My_drand48(init_rand);
             /* BPSK modulation + AWGN noise (Box Muller method for Gaussian sampling) */
             NoisyBin[n][q] = BPSK(NBIN[n][q]) + sigma*sqrt(-2.0*log(u))*cos(2.0*PI*v);
@@ -71,7 +76,8 @@ void ModelChannel_AWGN_BPSK (code_t *code, decoder_t *decoder, table_t *table, i
             TMP[g]=0.0;
             for (q=0; q<logGF; q++)
             {
-                TMP[g] = TMP[g] + SQR(NoisyBin[n][q]-BPSK(table->BINGF[g][q]))/(2.0*SQR(sigma));
+                //TMP[g] = TMP[g] + SQR(NoisyBin[n][q]-BPSK(table->BINGF[g][q]))/(2.0*SQR(sigma));
+                TMP[g] = TMP[g] - NoisyBin[n][q]*BPSK(table->BINGF[g][q]);
             }
 
         }
@@ -296,17 +302,7 @@ float table_64APSK[64][2]=
         //getchar();
         for(k=0; k<code->GF; k++)
         {
-            decoder->intrinsic_LLR[n][k] = +1e5;
-            decoder->intrinsic_GF[n][k] = -1;
-            for (g=0; g<code->GF; g++)
-            {
-                if (TMP[g] < decoder->intrinsic_LLR[n][k])
-                {
-                    decoder->intrinsic_LLR[n][k] = TMP[g];
-                    decoder->intrinsic_GF[n][k] = g;
-                }
-            }
-            TMP[decoder->intrinsic_GF[n][k]] = +1e5;
+            decoder->intrinsic_LLR[n][k] = TMP[k];
         }
 
     }
@@ -725,22 +721,9 @@ som=pos_gf_to_bin[k];
         }
         //getchar();
 
-        //sorting the intrinsic
         for(k=0; k<code->GF; k++)
         {
-            decoder->intrinsic_LLR[n][k] = +1e5;
-            decoder->intrinsic_GF[n][k] = -1;
-            for (g=0; g<code->GF; g++)
-            {
-                if (TMP[g] < decoder->intrinsic_LLR[n][k])
-                {
-
-                    decoder->intrinsic_LLR[n][k] = TMP[g];
-                    decoder->intrinsic_GF[n][k] = g;
-
-                }
-            }
-            TMP[decoder->intrinsic_GF[n][k]] = +1e5;
+        decoder->intrinsic_LLR[n][k] = TMP[k];
         }
 
     }
