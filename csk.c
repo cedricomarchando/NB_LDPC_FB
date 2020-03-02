@@ -265,7 +265,7 @@ void build_punctured_csk_mapping(int GF,int logGF, csk_t *csk, int **BINGF)
                 csk->CSK_arr[PN_index][j] = csk->PN[(j+i)%csk->PNsize];
             }
             GF_selected[GF_temp]=1;
-            //printf("CSK_index: %d \t GF_temp:%d \t PN_index:%d ",i,GF_temp,PN_index); getchar();
+            //printf("CSK_index: %d \t GF_temp:%d \t PN_index:%d \n",i,GF_temp,PN_index); //getchar();
             PN_index = PN_index + 1;
         }
         //printf(" \n ");
@@ -482,29 +482,35 @@ void ModelChannel_AWGN_BPSK_CSK (csk_t *csk, code_t *code, decoder_t *decoder, t
             TMP[g]=0.0;
             for (q=0; q<csk->PNsize; q++)
             {
-                //TMP[g] = TMP[g] + SQR(NoisyBin[n][q]-BPSK(table->BINGF[g][q]))/(2.0*SQR(sigma));
-
-                //TMP[g] = TMP[g] + SQR(NoisyBin[n][q]-   csk->CSK_arr[g][q]    )/(2.0*SQR(sigma));
-
-
                 temp = NoisyBin[n][q] *   csk->CSK_arr[g][q];
-                //temp = BPSK_quantif(temp, quantif_range_int, quantif_range_float);
-
+                //temp = SQR(NoisyBin[n][q]+ csk->CSK_arr[g][q])/(2.0*SQR(sigma));
                 TMP[g] = TMP[g] - temp;
-
-
             }
-
         }
-
         for(k=0; k<code->GF; k++)
         {
             decoder->intrinsic_LLR[n][k] = TMP[k];
         }
-
-
-
     }
+
+//    // !!!!!
+//    for (n=0; n<N/2; n++)
+//    {
+//        for (g=0; g<code->GF; g++)
+//        {
+//            TMP[g]=0.0;
+//            for (q=0; q<csk->PNsize-1; q++)
+//            {
+//                temp = NoisyBin[n][q] *   csk->CSK_arr[g][q];
+//                TMP[g] = TMP[g] - temp;
+//            }
+//        }
+//        for(k=0; k<code->GF; k++)
+//        {
+//            decoder->intrinsic_LLR[n][k] = TMP[k];
+//        }
+//    }
+
 
 
 
