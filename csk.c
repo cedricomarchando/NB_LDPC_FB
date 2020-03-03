@@ -145,6 +145,13 @@ void PNGenerator( csk_t *csk)
 
                 a = ((a << 1) + (LowBit & 1)) & 0x3FF; //return shifted 10 bit value
             }
+
+            for(i=0; i<csk->PNsize; i++)
+            {
+                csk->PN[i] =PN1024[i];
+                printf(" %d ",csk->PN[i]);
+            }
+            getchar();
         }
 
 
@@ -182,13 +189,18 @@ void PNGenerator( csk_t *csk)
                 LowBit = LowBit ^ (a >> 6); //x**7 term
                 LowBit = LowBit ^ (a >> 5); //x**6 term
                 LowBit = LowBit ^ (a); //x term
-
-
-
-
-
                 a = ((a << 1) + (LowBit & 1)) & 0x0FFF; //return shifted 12 bit value
+
             }
+
+            for(i=0; i<csk->PNsize; i++)
+            {
+                csk->PN[i] =PN4096[i];
+                printf(" %d ",csk->PN[i]);
+            }
+            getchar();
+
+
         }
 
     printf(" \n PN generation: Success\n");
@@ -523,4 +535,119 @@ void ModelChannel_AWGN_BPSK_CSK (csk_t *csk, code_t *code, decoder_t *decoder, t
 
 
 }
+
+
+
+/*!
+ * \fn ModelChannel_AWGN_64 (code_t *code, decoder_t *decoder, table_t *table, int **NBIN, float EbN, int *init_rand)
+ * \brief 64 modulation + AWGN noise on the codeword.
+ *                 The function computes the intrinsic_LLRs corresponding to the noisy observations.
+ * Inputs
+ * 	- NBIN : Binary copy of the codeword
+ * 	- EbN  : Signal to noise ratio in terms of Eb/No (dB)
+ * Outputs
+ *      - decoder->intrinsic_LLR
+ */
+void ModelChannel_AWGN_64_CSK(csk_t *csk,code_t *code, decoder_t *decoder, int **NBIN, float EbN, int *init_rand)
+{
+    const int N = code->N;
+    int n,k,g,q;
+    float u,v,sigma;
+    float TMP[code->GF];
+    int som;
+
+
+    float **NoisyBin = calloc(csk->PNsize,sizeof(float *));
+    for (q=0; q<csk->PNsize; q++) NoisyBin[q] = calloc(2,sizeof(float));
+    /* Binary-input AWGN channel : */
+
+    int i;
+
+    float modulation[code->GF][2];
+
+    ////compute normalization factor so that average power of one point of constellation is equal to one
+    float norm_factor=0.0;
+    for(i=0; i < code->GF ; i++)
+    {
+        // norm_factor = table_64QAM[i][0]*table_64QAM[i][0] + table_64QAM[i][1]*table_64QAM[i][1]+norm_factor;//compute sum
+        norm_factor = table_64APSK[i][0]*table_64APSK[i][0] + table_64APSK[i][1]*table_64APSK[i][1]+norm_factor;//compute sum
+    }
+    norm_factor = sqrt( code->GF / norm_factor);
+// printf(" norm_factor = %f ", norm_factor); getchar();
+
+    for(i=0; i< code->GF ; i++)
+    {
+        modulation[i][0]=norm_factor*table_64APSK[i][0];
+        modulation[i][1]=norm_factor*table_64APSK[i][1];
+    }
+    sigma = sqrt(1.0/(2.0*pow(10,EbN/10.0)));
+
+    for (n=0; n<N; n++)
+    {
+        som=0;
+
+        for (q=0; q<6; q++)
+        {
+            som = som + NBIN[n][q]*pow(2,q);
+        }
+        //printf("\n %d \n",som );
+
+        for (q=0; q<csk->PNsize; q++)
+        {
+            for (i=0; i<2; i++)
+            {
+                u=My_drand48(init_rand);
+                v=My_drand48(init_rand);
+                /* BPSK modulation + AWGN noise (Box Muller method for Gaussian sampling) */
+                NoisyBin[q][i] = modulation[(som+q)%64][i]+ sigma*sqrt(-2.0*log(u))*cos(2.0*PI*v)  ;
+            }
+        }
+
+
+        //printf("%f %f %f %f \n",NoisyBin[n][0], modulation[som][0] , NoisyBin[n][1] , modulation[som][1]);getchar();
+    //}
+
+    // /* Compute the Log intrinsic_LLR Ratio messages */
+    // for (n=0; n<N; n++)
+    // {
+
+        //printf("%d \n",code->GF);getchar();
+
+
+         for(k=0; k<code->GF; k++)
+        {
+            TMP[k] =0;
+        }
+
+    for (g=0; g<csk->PNsize; g++)
+    {
+        for(k=0; k<code->GF; k++)
+        {
+            som=0;
+
+            for (q=0; q<6; q++)
+            {
+                som = som + BinGF_64[k][q]*pow(2,q);
+            }
+            TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-modulation[(som+g)%64][0])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-modulation[(som+g)%64][1])/(2.0*SQR(sigma));
+            //printf("%d %f \n",k, TMP[k]);
+        }
+    }
+
+
+        //getchar();
+        for(k=0; k<code->GF; k++)
+        {
+            decoder->intrinsic_LLR[n][k] = TMP[k];
+        }
+    }
+
+    for (q=0; q<csk->PNsize; q++) free(NoisyBin[q]);
+    free(NoisyBin);
+}
+
+
+
+
+
 
