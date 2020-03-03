@@ -12,7 +12,7 @@
 
 #define SQR(A) ((A)*(A))   //calcule le carré d'un nombre
 #define BPSK(x) (1-2*(x))  // modulation BPSK
-
+#define PI 3.1415926536
 
 void ModelChannel_AWGN_BPSK (code_t *code, decoder_t *decoder, table_t *table,  int **NBIN, float EbN, int *init_rand);
 
@@ -1464,6 +1464,78 @@ static const float table_256_circleQAM[256][2]=
 {17, 5}
 
 };
+
+
+// from DVB S2X 8+16+20+20APSK constellation
+static const float table_64APSK[64][2]=
+{
+  {  2.2*cos(PI*25/16), 2.2*sin(PI*25/16)},
+{2.2*cos(PI*23/16), 2.2*sin(PI*23/16)},
+{2.2*cos(PI*7/16), 2.2*sin(PI*7/16)},
+{2.2*cos(PI*9/16), 2.2*sin(PI*9/16)},
+{5.2*cos(PI*7/4 ), 5.2*sin(PI*7/4 )},
+{5.2*cos(PI*5/4 ), 5.2*sin(PI*5/4 )},
+{5.2*cos(PI*1/4 ), 5.2*sin(PI*1/4 )},
+{5.2*cos(PI*3/4 ), 5.2*sin(PI*3/4 )},
+{2.2*cos(PI*27/16 ),2.2*sin(PI*27/16 )},
+{2.2*cos(PI*21/16 ), 2.2*sin(PI*21/16 )},
+{2.2*cos(PI*5/16 ), 2.2*sin(PI*5/16 )},
+{2.2*cos(PI*11/16 ), 2.2*sin(PI*11/16 )},
+{3.6*cos(PI*7/4 ) , 3.6*sin(PI*7/4 )},
+{3.6*cos(PI*5/4 ), 3.6*sin(PI*5/4 )},
+{3.6*cos(PI*1/4 ), 3.6*sin(PI*1/4 )},
+{3.6*cos(PI*3/4 ), 3.6*sin(PI*3/4 )},
+{5.2*cos(PI*31/20 ), 5.2*sin(PI*31/20 )},
+{5.2*cos(PI*29/20 ),5.2*sin(PI*29/20 )},
+{5.2*cos(PI*9/20 ), 5.2*sin(PI*9/20 )},
+{5.2*cos(PI*11/20 ), 5.2*sin(PI*11/20 )},
+{5.2*cos(PI*33/20 ),5.2*sin(PI*33/20 )},
+{5.2*cos(PI*27/20 ), 5.2*sin(PI*27/20 )},
+{5.2*cos(PI*7/20 ),5.2*sin(PI*7/20 )},
+{5.2*cos(PI*13/20 ), 5.2*sin(PI*13/20 )},
+{3.6*cos(PI*31/20 ),3.6*sin(PI*31/20 )},
+{3.6*cos(PI*29/20 ),3.6*sin(PI*29/20 )},
+{3.6*cos(PI*9/20 ), 3.6*sin(PI*9/20 )},
+{3.6*cos(PI*11/20 ), 3.6*sin(PI*11/20 )},
+{3.6*cos(PI*33/20 ),  3.6*sin(PI*33/20 )},
+{3.6*cos(PI*27/20 ),3.6*sin(PI*27/20 )},
+{3.6*cos(PI*7/20 ),3.6*sin(PI*7/20 )},
+{3.6*cos(PI*13/20 ), 3.6*sin(PI*13/20 )},
+{cos(PI*13/8 ),sin(PI*13/8 )},
+{cos(PI*11/8 ), sin(PI*11/8 )},
+{cos(PI*3/8 ),sin(PI*3/8 )},
+{cos(PI*5/8 ),sin(PI*5/8 )},
+{5.2*cos(PI*37/20 ),5.2*sin(PI*37/20 )},
+{5.2*cos(PI*23/20 ),  5.2*sin(PI*23/20 )},
+{5.2*cos(PI*3/20 ) ,5.2*sin(PI*3/20 )},
+{5.2*cos(PI*17/20 ),5.2*sin(PI*17/20 )},
+{2.2*cos(PI*29/16 ), 2.2*sin(PI*29/16 )},
+{2.2*cos(PI*19/16 ), 2.2*sin(PI*19/16 )},
+{2.2*cos(PI*3/16 ), 2.2*sin(PI*3/16 )},
+{2.2*cos(PI*13/16 ), 2.2*sin(PI*13/16 )},
+{3.6*cos(PI*37/20 ), 3.6*sin(PI*37/20 )},
+{3.6*cos(PI*23/20 ),  3.6*sin(PI*23/20 )},
+{3.6*cos(PI*3/20 ), 3.6*sin(PI*3/20 )},
+{3.6*cos(PI*17/20 ),3.6*sin(PI*17/20 )},
+{cos(PI*15/8 ),sin(PI*15/8 )},
+{cos(PI*9/8 ), sin(PI*9/8 )},
+{cos(PI*1/8 ),sin(PI*1/8 )},
+{cos(PI*7/8 ),sin(PI*7/8 )},
+{5.2*cos(PI*39/20 ),5.2*sin(PI*39/20 )},
+{5.2*cos(PI*21/20 ),5.2*sin(PI*21/20 )},
+{5.2*cos(PI*1/20 ),5.2*sin(PI*1/20 )},
+{5.2*cos(PI*19/20 ),5.2*sin(PI*19/20 )},
+{2.2*cos(PI*31/16 ),2.2*sin(PI*31/16 )},
+{2.2*cos(PI*17/16 ),2.2*sin(PI*17/16 )},
+{2.2*cos(PI*1/16 ),2.2*sin(PI*1/16 )},
+{2.2*cos(PI*15/16 ),2.2*sin(PI*15/16 )},
+{3.6*cos(PI*39/20 ),3.6*sin(PI*39/20 )},
+{3.6*cos(PI*21/20 ), 3.6*sin(PI*21/20 )},
+{3.6*cos(PI*1/20 ),3.6*sin(PI*1/20 )},
+{3.6*cos(PI*19/20 ),3.6*sin(PI*19/20 )}
+};
+
+
 
 
 
