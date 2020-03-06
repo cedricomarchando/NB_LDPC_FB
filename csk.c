@@ -207,6 +207,29 @@ void PNGenerator( csk_t *csk)
 
 }
 
+
+
+
+void CHU_Generator( float *chu_real,float *chu_imag,int N)
+{
+    int i;
+    int R=1;
+        for (i=0; i<N; i++)
+        {
+            chu_real[i] = cos( i*R*(i+1)*PI /N);
+            chu_imag[i] = sin( i*R*(i+1)*PI /N);
+            //printf(" real:%f \t imag:%f ",chu_real[i],chu_imag[i]); getchar();
+        }
+    printf(" \n CHU generation: Success\n");
+}
+
+
+
+
+
+
+
+
 /*
 Name: shiftPN(int GF, csk_t *csk)
 Brief: This function generates CSK_arr by shifting PN vector
@@ -538,6 +561,11 @@ void ModelChannel_AWGN_BPSK_CSK (csk_t *csk, code_t *code, decoder_t *decoder, t
 
 
 
+
+
+
+
+
 /*!
  * \fn ModelChannel_AWGN_64 (code_t *code, decoder_t *decoder, table_t *table, int **NBIN, float EbN, int *init_rand)
  * \brief 64 modulation + AWGN noise on the codeword.
@@ -655,6 +683,83 @@ void ModelChannel_AWGN_64_CSK(csk_t *csk,code_t *code, decoder_t *decoder, int *
     for (q=0; q<csk->PNsize; q++) free(NoisyBin[q]);
     free(NoisyBin);
 }
+
+
+
+
+
+void ModelChannel_CHU_CSK(float *chu_real,float *chu_imag, csk_t *csk,code_t *code, decoder_t *decoder, int **NBIN, float EbN, int *init_rand)
+{
+    const int N = code->N;
+    int n,k,g,q;
+    float u,v,sigma;
+    float TMP[code->GF];
+    int som;
+    int transmited = 6;// csk->PNsize
+
+    float **NoisyBin = calloc(transmited,sizeof(float *));
+    for (q=0; q<transmited; q++) NoisyBin[q] = calloc(2,sizeof(float));
+    int i;
+
+    //sigma = sqrt(1.0/(2.0*pow(10,EbN/10.0)));
+    sigma = sqrt(1.0/pow(10,EbN/10.0));
+
+    for (n=0; n<N; n++)
+    {
+        som=0;
+        for (q=0; q<6; q++)
+        {
+            som = som + NBIN[n][q]*pow(2,q);
+        }
+        for (q=0; q<transmited; q++)
+        {
+                u=My_drand48(init_rand);
+                v=My_drand48(init_rand);
+                NoisyBin[q][0] = chu_real[(som+q)%csk->PNsize]+ sigma*sqrt(-2.0*log(u))*cos(2.0*PI*v)  ;
+                u=My_drand48(init_rand);
+                v=My_drand48(init_rand);
+                NoisyBin[q][1] = chu_imag[(som+q)%csk->PNsize]+ sigma*sqrt(-2.0*log(u))*cos(2.0*PI*v)  ;
+        }
+
+         for(k=0; k<code->GF; k++)
+        {
+            TMP[k] =0;
+        }
+
+        for (g=0; g<transmited; g++)
+        {
+            for(k=0; k<code->GF; k++)
+            {
+                som=0;
+
+                for (q=0; q<6; q++)
+                {
+                    som = som + BinGF_64[k][q]*pow(2,q);
+                }
+                TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-chu_real[(som+g)%csk->PNsize])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-chu_imag[(som+g)%csk->PNsize])/(2.0*SQR(sigma));
+                //printf("%d %f \n",k, TMP[k]);
+            }
+        }
+
+        //getchar();
+        for(k=0; k<code->GF; k++)
+        {
+            decoder->intrinsic_LLR[n][k] = TMP[k];
+        }
+    }
+
+    for (q=0; q<transmited; q++) free(NoisyBin[q]);
+    free(NoisyBin);
+}
+
+
+
+
+
+
+
+
+
 
 
 
