@@ -16,6 +16,8 @@ typedef struct
 
 void PNGenerator( csk_t *csk);
 
+void CHU_Generator( float *chu_real,float *chu_imag,int N);
+
 void build_natural_csk_mapping(int GF, csk_t *csk);
 
 void build_punctured_csk_mapping(int GF,int logGF, csk_t *csk, int **BINGF);
@@ -33,6 +35,10 @@ void ModelChannel_AWGN_BPSK_CSK (csk_t *csk, code_t *code, decoder_t *decoder, t
 void ModelChannel_AWGN_64_CSK(csk_t *csk,code_t *code, decoder_t *decoder, int **NBIN, float EbN, int *init_rand);
 
 void ModelChannel_AWGN_256_CSK(csk_t *csk,code_t *code, decoder_t *decoder, int **NBIN, float EbN, int *init_rand);
+
+void ModelChannel_CHU_CSK(float *chu_real,float *chu_imag, csk_t *csk,code_t *code, decoder_t *decoder, int **NBIN, float EbN, int *init_rand);
+
+
 
 static const int PN1024[1024]={-1,1,1,-1,1,1,1,1,-1,-1,-1,1,1,-1,1,-1,-1,-1,1,-1,1,1,-1,1,-1,1,1,1,-1,1,-1,1,1,1,-1,1,1,1,1,1,1,1,-1,-1,1,1,-1,1,-1,-1,
 -1,1,1,-1,-1,-1,-1,1,1,-1,-1,1,-1,-1,-1,1,-1,1,1,-1,-1,1,1,-1,-1,1,1,1,-1,-1,-1,-1,-1,1,-1,-1,-1,-1,-1,-1,-1,-1,1,-1,1,-1,1,-1,1,-1,-1,-1,1,-1,1,-1,1,-1,
