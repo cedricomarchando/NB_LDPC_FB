@@ -213,7 +213,13 @@ void PNGenerator( csk_t *csk)
 void CHU_Generator( float *chu_real,float *chu_imag,int N)
 {
     int i;
-    int R=1;
+    int R=3;
+if(N == 64) R=3;
+if(N == 128) R=3;
+    if(N == 256) R=3;
+    if(N == 512) R=7;
+    if(N == 1024) R=7;
+
         for (i=0; i<N; i++)
         {
             chu_real[i] = cos( i*R*(i+1)*PI /N);
@@ -695,7 +701,8 @@ void ModelChannel_CHU_CSK(float *chu_real,float *chu_imag, csk_t *csk,code_t *co
     float u,v,sigma;
     float TMP[code->GF];
     int som;
-    int transmited = 6;// csk->PNsize
+    int transmited = csk->PNsize;
+    //int transmited = 6;
 
     float **NoisyBin = calloc(transmited,sizeof(float *));
     for (q=0; q<transmited; q++) NoisyBin[q] = calloc(2,sizeof(float));
