@@ -214,18 +214,254 @@ void CHU_Generator( float *chu_real,float *chu_imag,int N)
 {
     int i;
     int R=1;
-if(N == 64) R=1;
-//if(N == 128) R=3;
-    if(N == 256) R=1;
-//    if(N == 512) R=7;
-    if(N == 1024) R=1;
+//if(N == 64) R=1;
+////if(N == 128) R=3;
+//    if(N == 256) R=1;
+////    if(N == 512) R=7;
+//    if(N == 1024) R=1;
 
         for (i=0; i<N; i++)
         {
-            chu_real[i] = cos( i*R*(i+2)*PI /N);
-            chu_imag[i] = sin( i*R*(i+2)*PI /N);
+            chu_real[i] = cos( i*R*(i)*PI /N);
+            chu_imag[i] = sin( i*R*(i)*PI /N);
             //printf(" real:%f \t imag:%f ",chu_real[i],chu_imag[i]); getchar();
         }
+    printf(" \n CHU generation: Success\n");
+}
+
+
+
+
+void CHU_AM_Generator( float *chu_real,float *chu_imag,int N)
+{
+    int i;
+    int R=1;
+    float chu_energie;
+    float norm_factor;
+
+
+        for (i=0; i<N; i++)
+        {
+            chu_real[i] = cos( i*R*(i)*PI /N);
+            chu_imag[i] = sin( i*R*(i)*PI /N);
+            //printf(" real:%f \t imag:%f ",chu_real[i],chu_imag[i]); getchar();
+        }
+
+
+//        for (i=1; i<N/2 ; i++)
+//        {
+//            chu_real[i] = chu_real[i]*i;
+//            chu_imag[i] = chu_imag[i]*i;
+//            chu_real[N-i] = chu_real[N-i]*i;
+//            chu_imag[N-i] = chu_imag[N-i]*i;
+//        }
+//        chu_real[N/2] = chu_real[N/2]*N/2;
+//        chu_imag[N/2] = chu_imag[N/2]*N/2;
+
+        for (i=0; i<N ; i++)
+        {
+            chu_real[i] = chu_real[i]*sin((i+1)*PI/N);
+            chu_imag[i] = chu_imag[i]*sin((i+1)*PI/N);
+        }
+
+
+//        for (i=0; i<N; i++)
+//        {
+//           printf("%d \t %f \t %f \t %f\n",i,chu_real[i],chu_imag[i],sin((i+1)*PI/N));
+//        }
+//        getchar();
+
+
+
+        chu_energie = 0.0;
+        for (i=0; i<N; i++)
+        {
+            chu_energie = chu_energie + chu_real[i]*chu_real[i] + chu_imag[i]* chu_imag[i];
+        }
+        norm_factor=sqrt(N/chu_energie);
+
+        for (i=0; i<N; i++)
+        {
+            chu_real[i] = norm_factor * chu_real[i];
+            chu_imag[i] = norm_factor *chu_imag[i];
+        }
+
+//        for (i=0; i<256; i++)
+//        {
+//           printf("%d  %f  %f \n",i, chu_real[i],chu_imag[i]);
+//        }
+//        getchar();
+
+
+    printf(" \n CHU generation: Success\n");
+}
+
+
+
+
+void CHU_Generator_64apsk( float *chu_real,float *chu_imag,int N)
+{
+    int i;
+    int R=1;
+    float chu_energie;
+    float norm_factor;
+    int nb_c1,nb_c2,nb_c3,nb_c4;
+    float r_c2,r_c3,r_c4;
+
+    nb_c1=32;
+    nb_c2=16;
+    nb_c3=8;
+    nb_c4=8;
+
+    r_c2=0.8;
+    r_c3=0.55;
+    r_c4=0.3;
+
+        for (i=0; i<nb_c1; i++)
+        {
+            chu_real[i] = cos( i*R*(i+1)*PI /nb_c1);
+            chu_imag[i] = sin( i*R*(i+1)*PI /nb_c1);
+            //printf(" real:%f \t imag:%f ",chu_real[i],chu_imag[i]); getchar();
+        }
+
+        for (i=0; i<nb_c2; i++)
+        {
+            chu_real[i+nb_c1] = r_c2*cos( i*R*(i+1)*PI /nb_c2 + PI);
+            chu_imag[i+nb_c1] = -r_c2*sin( i*R*(i+1)*PI /nb_c2 + PI);
+            //printf(" real:%f \t imag:%f ",chu_real[i],chu_imag[i]); getchar();
+        }
+
+
+        for (i=0; i<nb_c3; i++)
+        {
+            chu_real[i+nb_c1 +nb_c2] =r_c3* cos( i*R*(i+1)*PI /nb_c3);
+            chu_imag[i+nb_c1 + nb_c2] = r_c3*sin( i*R*(i+1)*PI /nb_c3);
+            //printf(" real:%f \t imag:%f ",chu_real[i],chu_imag[i]); getchar();
+        }
+
+        for (i=0; i<nb_c4; i++)
+        {
+            chu_real[i+nb_c1 +nb_c2 + nb_c3] = r_c4* cos( i*R*(i+1)*PI /nb_c4 );
+            chu_imag[i+nb_c1 +nb_c2 + nb_c3] = -r_c4*sin( i*R*(i+1)*PI /nb_c4 );
+            //printf(" real:%f \t imag:%f ",chu_real[i],chu_imag[i]); getchar();
+        }
+
+
+
+        chu_energie = 0.0;
+        for (i=0; i<64; i++)
+        {
+            chu_energie = chu_energie + chu_real[i]*chu_real[i] + chu_imag[i]* chu_imag[i];
+        }
+        norm_factor=sqrt(64/chu_energie);
+
+        for (i=0; i<64; i++)
+        {
+            chu_real[i] = norm_factor * chu_real[i];
+            chu_imag[i] = norm_factor *chu_imag[i];
+        }
+
+//        for (i=0; i<64; i++)
+//        {
+//           printf("%f  %f \n",chu_real[i],chu_imag[i]);
+//        }
+//        getchar();
+
+
+    printf(" \n CHU generation: Success\n");
+}
+
+
+
+
+
+
+void CHU_Generator_256apsk( float *chu_real,float *chu_imag,int N)
+{
+    int i;
+    int R=1;
+    float chu_energie;
+    float norm_factor;
+    int nb_c1,nb_c2,nb_c3,nb_c4,nb_c5,nb_c6;
+    float r_c1,r_c2,r_c3,r_c4,r_c5,r_c6;
+
+    nb_c1=16;
+    nb_c2=16;
+    nb_c3=32;
+    nb_c4=64;
+    nb_c5=64;
+    nb_c6=64;
+
+    r_c1=0.15;
+    r_c2=0.25;
+    r_c3=0.4;
+    r_c4=0.6;
+    r_c5=0.8;
+    r_c6=1.0;
+
+        for (i=0; i<nb_c1; i++)
+        {
+            chu_real[i] = r_c1*cos( i*R*(i+1)*PI /nb_c1);
+            chu_imag[i] = -r_c1*sin( i*R*(i+1)*PI /nb_c1);
+            //printf(" real:%f \t imag:%f ",chu_real[i],chu_imag[i]); getchar();
+        }
+
+        for (i=0; i<nb_c2; i++)
+        {
+            chu_real[i+nb_c1] = r_c2*cos( i*R*(i+1)*PI /nb_c2 + PI);
+            chu_imag[i+nb_c1] = r_c2*sin( i*R*(i+1)*PI /nb_c2 + PI);
+            //printf(" real:%f \t imag:%f ",chu_real[i],chu_imag[i]); getchar();
+        }
+
+
+        for (i=0; i<nb_c3; i++)
+        {
+            chu_real[i+nb_c1 +nb_c2] =r_c3* cos( i*R*(i+1)*PI /nb_c3);
+            chu_imag[i+nb_c1 + nb_c2] = r_c3*sin( i*R*(i+1)*PI /nb_c3);
+            //printf(" real:%f \t imag:%f ",chu_real[i],chu_imag[i]); getchar();
+        }
+R=11;
+        for (i=0; i<nb_c4; i++)
+        {
+            chu_real[i+nb_c1 +nb_c2 + nb_c3] = r_c4* cos( i*R*(i+1)*PI /nb_c4 );
+            chu_imag[i+nb_c1 +nb_c2 + nb_c3] = r_c4*sin( i*R*(i+1)*PI /nb_c4 );
+            //printf(" real:%f \t imag:%f ",chu_real[i],chu_imag[i]); getchar();
+        }
+R=1;
+        for (i=0; i<nb_c5; i++)
+        {
+            chu_real[i+nb_c1 +nb_c2 + nb_c3+nb_c4] = r_c5* cos( i*R*(i+1)*PI /nb_c5 );
+            chu_imag[i+nb_c1 +nb_c2 + nb_c3+nb_c4] = -r_c5*sin( i*R*(i+1)*PI /nb_c5 );
+            //printf(" real:%f \t imag:%f ",chu_real[i],chu_imag[i]); getchar();
+        }
+
+        for (i=0; i<nb_c6; i++)
+        {
+            chu_real[i+nb_c1 +nb_c2 + nb_c3+nb_c4 +nb_c5] = r_c6* cos( i*R*(i+1)*PI /nb_c6 );
+            chu_imag[i+nb_c1 +nb_c2 + nb_c3+nb_c4 +nb_c5] = r_c6*sin( i*R*(i+1)*PI /nb_c6 );
+            //printf(" real:%f \t imag:%f ",chu_real[i],chu_imag[i]); getchar();
+        }
+
+        chu_energie = 0.0;
+        for (i=0; i<256; i++)
+        {
+            chu_energie = chu_energie + chu_real[i]*chu_real[i] + chu_imag[i]* chu_imag[i];
+        }
+        norm_factor=sqrt(256/chu_energie);
+
+        for (i=0; i<256; i++)
+        {
+            chu_real[i] = norm_factor * chu_real[i];
+            chu_imag[i] = norm_factor *chu_imag[i];
+        }
+
+//        for (i=0; i<256; i++)
+//        {
+//           printf("%d %f  %f \n",i,chu_real[i],chu_imag[i]);
+//        }
+//        getchar();
+
+
     printf(" \n CHU generation: Success\n");
 }
 
@@ -534,23 +770,23 @@ void ModelChannel_AWGN_BPSK_CSK (csk_t *csk, code_t *code, decoder_t *decoder, t
         }
     }
 
-    // !!!!! for hybrid CCSK
-    for (n=0; n<N/2; n++)
-    {
-        for (g=0; g<code->GF; g++)
-        {
-            TMP[g]=0.0;
-            for (q=0; q<csk->PNsize-1; q++)
-            {
-                temp = NoisyBin[n][q] *   csk->CSK_arr[g][q];
-                TMP[g] = TMP[g] - temp;
-            }
-        }
-        for(k=0; k<code->GF; k++)
-        {
-            decoder->intrinsic_LLR[n][k] = TMP[k];
-        }
-    }
+//    // !!!!! for hybrid CCSK
+//    for (n=0; n<N/2; n++)
+//    {
+//        for (g=0; g<code->GF; g++)
+//        {
+//            TMP[g]=0.0;
+//            for (q=0; q<csk->PNsize-1; q++)
+//            {
+//                temp = NoisyBin[n][q] *   csk->CSK_arr[g][q];
+//                TMP[g] = TMP[g] - temp;
+//            }
+//        }
+//        for(k=0; k<code->GF; k++)
+//        {
+//            decoder->intrinsic_LLR[n][k] = TMP[k];
+//        }
+//    }
 
 
 
@@ -664,7 +900,7 @@ void ModelChannel_AWGN_64_CSK(csk_t *csk,code_t *code, decoder_t *decoder, int *
         }
 
 
-        if (n<N/2) // per symbol puncturing
+        if (n<N) // per symbol puncturing
         {
 
             for(k=0; k<code->GF; k++)
@@ -717,7 +953,7 @@ void ModelChannel_AWGN_64_CSK(csk_t *csk,code_t *code, decoder_t *decoder, int *
 
 
 
-
+//LLR generation using Zadoff-Chu sequence, with puncturing and hybrid puncturing
 void ModelChannel_CHU_CSK(float *chu_real,float *chu_imag, csk_t *csk,code_t *code, decoder_t *decoder, int **NBIN, float EbN, int *init_rand)
 {
     const int N = code->N;
@@ -727,6 +963,8 @@ void ModelChannel_CHU_CSK(float *chu_real,float *chu_imag, csk_t *csk,code_t *co
     int som;
     //int transmited = csk->PNsize;
     int transmited = 1;
+    int mapping_step =3;
+    int mappinp_start =9;
 
     float **NoisyBin = calloc(transmited,sizeof(float *));
     for (q=0; q<transmited; q++) NoisyBin[q] = calloc(2,sizeof(float));
@@ -738,7 +976,7 @@ void ModelChannel_CHU_CSK(float *chu_real,float *chu_imag, csk_t *csk,code_t *co
     for (n=0; n<N; n++)
     {
         som=0;
-        for (q=0; q<6; q++)
+        for (q=0; q<code->logGF; q++)
         {
             som = som + NBIN[n][q]*pow(2,q);
         }
@@ -746,10 +984,10 @@ void ModelChannel_CHU_CSK(float *chu_real,float *chu_imag, csk_t *csk,code_t *co
         {
                 u=My_drand48(init_rand);
                 v=My_drand48(init_rand);
-                NoisyBin[q][0] = chu_real[(som*17+q)%csk->PNsize]+ sigma*sqrt(-2.0*log(u))*cos(2.0*PI*v)  ;
+                NoisyBin[q][0] = chu_real[(mappinp_start+som*mapping_step+q)%csk->PNsize]+ sigma*sqrt(-2.0*log(u))*cos(2.0*PI*v)  ;
                 u=My_drand48(init_rand);
                 v=My_drand48(init_rand);
-                NoisyBin[q][1] = chu_imag[(som*17+q)%csk->PNsize]+ sigma*sqrt(-2.0*log(u))*cos(2.0*PI*v)  ;
+                NoisyBin[q][1] = chu_imag[(mappinp_start+som*mapping_step+q)%csk->PNsize]+ sigma*sqrt(-2.0*log(u))*cos(2.0*PI*v)  ;
         }
 
         for(k=0; k<code->GF; k++)
@@ -757,7 +995,7 @@ void ModelChannel_CHU_CSK(float *chu_real,float *chu_imag, csk_t *csk,code_t *co
             TMP[k] =0;
         }
 
-        if(n<5*N/9)
+        if(n< N) // for hybrid puncturing, set for example n<N/2
         {
             for (g=0; g<transmited; g++)
                 {
@@ -765,11 +1003,12 @@ void ModelChannel_CHU_CSK(float *chu_real,float *chu_imag, csk_t *csk,code_t *co
                     {
                         som=0;
 
-                        for (q=0; q<6; q++)
+                        for (q=0; q<code->logGF; q++)
                         {
+                            //som = som + BinGF_256[k][q]*pow(2,q);
                             som = som + BinGF_64[k][q]*pow(2,q);
                         }
-                        TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-chu_real[(som*17+g)%csk->PNsize])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-chu_imag[(som*17+g)%csk->PNsize])/(2.0*SQR(sigma));
+                        TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-chu_real[(mappinp_start+som*mapping_step+g)%csk->PNsize])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-chu_imag[(mappinp_start+som*mapping_step+g)%csk->PNsize])/(2.0*SQR(sigma));
                         //printf("%d %f \n",k, TMP[k]);
                     }
                 }
@@ -782,11 +1021,12 @@ void ModelChannel_CHU_CSK(float *chu_real,float *chu_imag, csk_t *csk,code_t *co
                     {
                         som=0;
 
-                        for (q=0; q<6; q++)
+                        for (q=0; q<code->logGF ; q++)
                         {
+                            //som = som + BinGF_256[k][q]*pow(2,q);
                             som = som + BinGF_64[k][q]*pow(2,q);
                         }
-                        TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-chu_real[(som*17+g)%csk->PNsize])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-chu_imag[(som*17+g)%csk->PNsize])/(2.0*SQR(sigma));
+                        TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-chu_real[(mappinp_start+som*mapping_step+g)%csk->PNsize])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-chu_imag[(mappinp_start+som*mapping_step+g)%csk->PNsize])/(2.0*SQR(sigma));
                         //printf("%d %f \n",k, TMP[k]);
                     }
                 }
