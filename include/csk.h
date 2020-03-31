@@ -17,6 +17,9 @@ typedef struct
 void PNGenerator( csk_t *csk);
 
 void CHU_Generator( float *chu_real,float *chu_imag,int N);
+void CHU_AM_Generator( float *chu_real,float *chu_imag,int N);
+void CHU_Generator_64apsk( float *chu_real,float *chu_imag,int N);
+void CHU_Generator_256apsk( float *chu_real,float *chu_imag,int N);
 
 void build_natural_csk_mapping(int GF, csk_t *csk);
 
