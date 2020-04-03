@@ -24,7 +24,7 @@
 #include "./include/NB_LDPC.h"
 
 /// preprocessing directives
-#define CCSK // use of Code-shift keying modulation
+//#define CCSK // use of Code-shift keying modulation
 //#define stat_ecn
 
 
@@ -140,16 +140,27 @@ int main(int argc, char * argv[])
     // CCSK: build CCSK table
     csk_t csk;
     //csk.PNsize =code.GF;
-    csk.PNsize =4096;
+    csk.PNsize = 256;
     printf("\n\t PN is generated using an LFSR \n");
     allocate_csk(&csk, csk.PNsize);
     PNGenerator( &csk ); //generate a PN sequence for csk modulation
-    //build_natural_csk_mapping(code.GF, &csk); //fills the csk_arr with shifted versions of PN sequence
-    build_punctured_csk_mapping(code.GF,code.logGF, &csk, table.BINGF);
+    build_natural_csk_mapping(code.GF, &csk); //fills the csk_arr with shifted versions of PN sequence
+    //build_punctured_csk_mapping(code.GF,code.logGF, &csk, table.BINGF);
     //build_CSK_map(&code, &csk); //construction of a mapping without PN sequence
 
 
-    csk.PNsize =8;  // for "short" CCSK mapping
+    float chu_real[csk.PNsize];
+    float chu_imag[csk.PNsize];
+    //CHU_Generator(chu_real,chu_imag,csk.PNsize);
+    CHU_AM_Generator(chu_real,chu_imag,csk.PNsize);
+    //CHU_Generator_64apsk(chu_real,chu_imag,csk.PNsize);
+    //CHU_Generator_256apsk(chu_real,chu_imag,csk.PNsize);
+
+
+
+
+
+    csk.PNsize = 256;  // for "short" CCSK mapping
 
     float  quantif_range_int_BPSK; //not used yet
     float quantif_range_float_BPSK; //not used yet
@@ -233,10 +244,15 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
 
         /* Noisy channel (AWGN)*/
         #ifdef CCSK
-        ModelChannel_AWGN_BPSK_CSK (&csk,&code, &decoder, &table, CodeWord, EbN,&Idum, quantif_range_int_BPSK, quantif_range_float_BPSK);
+        //ModelChannel_AWGN_BPSK_CSK (&csk,&code, &decoder, &table, CodeWord, EbN,&Idum, quantif_range_int_BPSK, quantif_range_float_BPSK);
+        ModelChannel_CHU_CSK(chu_real,chu_imag, &csk,&code, &decoder, NBIN, EbN, &Idum);
+
+        //ModelChannel_AWGN_64_CSK (&csk,&code, &decoder, NBIN, EbN,&Idum);
+        //ModelChannel_AWGN_256_CSK (&csk,&code, &decoder, NBIN, EbN,&Idum);
+        //ModelChannel_AWGN_64APSK_CSK256(&csk,&code, &decoder, NBIN, EbN, &Idum);
         #endif
         #ifndef CCSK
-                ModelChannel_AWGN_BPSK (&code, &decoder, &table,  NBIN, EbN,&Idum);
+            ModelChannel_AWGN_BPSK (&code, &decoder, &table,  NBIN, EbN,&Idum);
         //ModelChannel_AWGN_64 (&code, &decoder, NBIN, EbN,&Idum);
         //ModelChannel(&code, &decoder,  NBIN, EbN,&Idum);
         //ModelChannel_AWGN_256QAM_4D (&code, &decoder, NBIN, EbN,&Idum);
@@ -350,7 +366,7 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
             if (synd == 0)
                 nbUndetectedErrors ++;
         }
-        if (nb%100 ==0)
+        if (nb%10 ==0)
         {
                     printf("\r<%d> FER= %d / %d = %f BER= %d / x = %f  avr_it=%.2f",
                nbUndetectedErrors, nbErroneousFrames, nb,(double)(nbErroneousFrames)/ nb,total_errors,(double)total_errors/(nb*code.K*code.logGF),(double)(sum_it)/nb);
