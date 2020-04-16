@@ -36,7 +36,7 @@ void PNGenerator( csk_t *csk)
     int i;
     int a;
     int LowBit;
-        // for GF(64)
+
         if(csk->PNsize == 64)
         {
             a=32;
@@ -56,6 +56,30 @@ void PNGenerator( csk_t *csk)
             }
         //getchar();
         }
+
+
+        if(csk->PNsize == 128)
+        {
+            a=64;
+            for(i=0; i<csk->PNsize; i++)
+            {
+                //*******************************************
+                //** primitive polynomial x**7+x**3+1
+                //*******************************************
+                csk->PN[i]=BPSK((a >> 6));//the output
+                //feedback and shift
+                LowBit = a >> 6; //x**7 term
+                LowBit = LowBit ^ (a >> 2); //x**3 term
+                a = ((a << 1) + (LowBit & 1)) & 0x07F; //return shifted 6 bit value
+                //printf(" %d ",csk->PN[i] );
+            }
+        //getchar();
+        }
+
+
+
+
+
         // For GF(256) with polynomial P(x)=X^8+ X^4+X^3+X^2+1
         if(csk->PNsize == 256)
         {
@@ -242,8 +266,8 @@ void CHU_AM_Generator( float *chu_real,float *chu_imag,int N)
 
         for (i=0; i<N; i++)
         {
-            chu_real[i] = cos( i*R*(i)*PI /N);
-            chu_imag[i] = sin( i*R*(i)*PI /N);
+            chu_real[i] = cos( i*R*(i+1)*PI /N);
+            chu_imag[i] = sin( i*R*(i+1)*PI /N);
             //printf(" real:%f \t imag:%f ",chu_real[i],chu_imag[i]); getchar();
         }
 
@@ -697,7 +721,7 @@ void free_csk(csk_t *csk)
  * Outputs
  *      - decoder->intrinsic_LLR
  */
-void ModelChannel_AWGN_BPSK_CSK (csk_t *csk, code_t *code, decoder_t *decoder, table_t *table, int *CodeWord, float EbN,int *init_rand, float quantif_range_int,float quantif_range_float)
+void ModelChannel_AWGN_BPSK_CSK (csk_t *csk, code_t *code, decoder_t *decoder, table_t *table, int *CodeWord, float EbN,int *init_rand)
 {
     const int N = code->N;
     int n,k,g,q;
@@ -761,6 +785,7 @@ void ModelChannel_AWGN_BPSK_CSK (csk_t *csk, code_t *code, decoder_t *decoder, t
             {
                 temp = NoisyBin[n][q] *   csk->CSK_arr[g][q];
                 //temp = SQR(NoisyBin[n][q]+ csk->CSK_arr[g][q])/(2.0*SQR(sigma));
+                //temp = -SQR(NoisyBin[n][q]- csk->CSK_arr[g][q])/(2.0*SQR(sigma)); //distance
                 TMP[g] = TMP[g] - temp;
             }
         }
@@ -826,7 +851,6 @@ void ModelChannel_AWGN_64_CSK(csk_t *csk,code_t *code, decoder_t *decoder, int *
     float TMP[code->GF];
     int som;
 
-
     float **NoisyBin = calloc(csk->PNsize,sizeof(float *));
     for (q=0; q<csk->PNsize; q++) NoisyBin[q] = calloc(2,sizeof(float));
     /* Binary-input AWGN channel : */
@@ -837,20 +861,44 @@ void ModelChannel_AWGN_64_CSK(csk_t *csk,code_t *code, decoder_t *decoder, int *
 
     const int CCSK64[128]={
 
-//        0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,
-//    41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,
+  //      0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,
+  //  41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,
 
-            2,57,33,29,26,4,58,10,27,43,37,7,19,20,0,63,6,51,8,36,9,62,53,15,18,23,5,34,13,55,45,16,46,35,48,21,61,22,40,12,56,47,24,1,39,
-    41,42,44,38,59,32,49,30,17,50,52,11,54,14,3,60,31,25,28,
 
-    0,21,61,48,2,8,57,49,19,14,62,53,16,6,20,45,22,24,26,54,28,30,1,5,59,10,60,43,55,32,11,46,18,34,52,36,9,38,12,58,40,
-    23,25,50,27,42,13,51,29,31,56,4,33,17,44,3,63,35,37,39,41,15,47,7,
+//            2,57,33,29,26,4,58,10,27,43,37,7,19,20,0,63,6,51,8,36,9,62,53,15,18,23,5,34,13,55,45,16,46,35,48,21,61,22,40,12,56,47,24,1,39,
+//    41,42,44,38,59,32,49,30,17,50,52,11,54,14,3,60,31,25,28,
+//
+//    0,21,61,48,2,8,57,49,19,14,62,53,16,6,20,45,22,24,26,54,28,30,1,5,59,10,60,43,55,32,11,46,18,34,52,36,9,38,12,58,40,
+//    23,25,50,27,42,13,51,29,31,56,4,33,17,44,3,63,35,37,39,41,15,47,7
+
 
 
 //    0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,
 //    41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63
 
 
+////new max 179
+//17, 39, 6, 61, 54, 27, 38, 31, 18, 9, 43, 37, 56, 14, 35, 46, 21, 3, 57, 11, 47, 29, 1, 62, 55, 7, 49, 28, 24, 4, 44, 36, 53, 8,
+//40, 41, 26, 42, 15, 30, 52, 59, 5, 25, 10, 0, 45, 58, 2, 32, 33, 34, 19, 13, 48, 50, 51, 22, 63, 12, 23, 60, 20, 16, 49, 7, 40, 56,
+//35, 48, 45, 51, 5, 27, 31, 62, 0, 3, 9, 58, 63, 46, 60, 29, 23, 52, 43, 12, 11, 38, 44, 6, 18, 14, 15, 36, 42, 26, 50, 16, 20, 21, 32,
+//41, 55, 47, 8, 30, 37, 59, 4, 34, 61, 39, 33, 54, 53, 19, 57, 25, 2, 17, 10, 13, 28, 22, 24, 1
+
+//new2
+//42,  10,  51,  24,  0,  35,  48,  57,  56,  45,  18,  26,  19,  5,  30,  17,  40,  31,  38,  36,  29,  47,  23,  43,  32,  15,  44,  33,  8,  52,  54,  49,  9,  61,  20,  22,  4,  55,  1,  34,  14,  50,  16,  2,  59,  53,  39,  21,  60,  12,  11,  41,  13,  3,  37,  7,  62,  58,  6,  46,  25,  28,  27,  63,  38,  18,  12,  33,  56,  44,  6,  46,  61,  32,  17,  51,  40,  34,  10,  49,  4,  43,  55,  57,  20,  39,  58,  1,  28,  16,  31,  45,  35,  41,  27,  7,  26,  22,  11,  25,  13,  59,  24,  9,  29,  21,  50,  15,  0,  2,  63,  36,  8,  42,  48,  23,  3,  60,  37,  30,  52,  54,  19,  62,  5,  47,  53,  14
+
+//new3 585
+//50,  0,  30,  8,  44,  15,  12,  5,  2,  47,  6,  29,  49,  11,  40,  28,  16,  32,  19,  62,  33,  63,  41,  3,  53,  24,  55,  13,  48,  31,  38,  56,  1,  61,  46,  20,  22,  10,  35,  18,  9,  14,  60,  27,  21,  54,  36,  26,  45,  59,  37,  4,  57,  39,  51,  58,  23,  52,  42,  17,  43,  34,  25,  7,  27,  40,  26,  24,  53,  1,  50,  49,  35,  2,  31,  41,  42,  39,  33,  8,  56,  29,  16,  45,  0,  5,  48,  37,  11,  60,  28,  18,  6,  62,  46,  9,  23,  12,  36,  51,  25,  30,  44,  52,  55,  22,  21,  47,  19,  32,  17,  7,  58,  20,  59,  61,  14,  10,  54,  3,  57,  38,  4,  43,  15,  63,  34,  13
+//new 4 max198
+//22,  8,  46,  16,  56,  1,  47,  32,  31,  28,  0,  23,  54,  2,  40,  11,  33,  38,  57,  9,  49,  3,  58,  37,  42,  12,  36,  5,  24,  20,  35,  52,  7,  45,  4,  26,  43,  13,  60,  29,  48,  50,  41,  59,  18,  44,  19,  61,  53,  15,  62,  21,  14,  51,  10,  34,  39,  63,  55,  25,  17,  27,  30,  6,  23,  2,  54,  17,  36,  60,  46,  38,  3,  41,  53,  29,  50,  55,  25,  56,  42,  49,  44,  18,  12,  45,  47,  8,  30,  39,  61,  6,  40,  19,  43,  0,  31,  7,  51,  10,  22,  13,  20,  58,  57,  26,  5,  59,  21,  14,  16,  15,  28,  4,  9,  63,  11,  34,  32,  35,  1,  37,  27,  48,  33,  62,  52,  24
+//new 5 sum12149
+//18,  55,  44,  4,  36,  27,  26,  35,  52,  24,  40,  51,  2,  48,  22,  7,  42,  58,  9,  34,  6,  14,  41,  53,  1,  61,  8,  0,  62,  3,  43,  16,  60,  17,  33,  49,  10,  5,  39,  59,  11,  29,  21,  47,  56,  54,  25,  46,  20,  23,  31,  32,  63,  28,  45,  38,  13,  30,  57,  15,  50,  19,  37,  12,  2,  41,  49,  33,  48,  29,  10,  55,  0,  12,  21,  38,  5,  24,  52,  7,  62,  50,  53,  40,  9,  57,  11,  1,  47,  23,  32,  8,  28,  56,  58,  39,  36,  14,  60,  37,  16,  44,  59,  46,  34,  51,  13,  19,  3,  22,  63,  45,  27,  30,  31,  43,  6,  26,  25,  20,  17,  42,  61,  15,  35,  54,  18,  4
+// new 6 sum(ccorr.^2) 1M48 sum12194 max230
+//1,  32,  18,  16,  28,  41,  35,  34,  27,  46,  29,  49,  15,  53,  26,  40,  3,  56,  57,  24,  48,  22,  50,  55,  23,  60,  51,  4,  5,  21,  33,  25,  17,  45,  47,  2,  20,  54,  11,  0,  37,  13,  10,  44,  30,  8,  31,  61,  6,  43,  14,  9,  63,  7,  12,  36,  58,  52,  62,  38,  59,  19,  39,  42,  8,  46,  36,  49,  15,  56,  37,  23,  41,  10,  48,  22,  40,  45,  43,  38,  2,  16,  52,  31,  25,  54,  47,  34,  12,  27,  28,  19,  29,  58,  61,  30,  35,  33,  3,  39,  59,  21,  50,  11,  57,  53,  1,  44,  7,  14,  42,  5,  0,  20,  4,  17,  55,  32,  13,  62,  26,  51,  6,  60,  18,  63,  9,  24
+//new7 distance.^2 47M53
+//32,  46,  62,  60,  39,  27,  35,  23,  22,  8,  29,  10,  53,  19,  18,  13,  42,  54,  45,  36,  44,  0,  6,  59,  16,  55,  28,  63,  9,  3,  51,  61,  56,  11,  25,  49,  41,  40,  14,  52,  43,  38,  31,  50,  1,  4,  17,  26,  21,  15,  58,  7,  5,  2,  37,  57,  24,  34,  20,  30,  12,  33,  48,  47,  0,  30,  55,  24,  31,  59,  49,  40,  5,  17,  1,  50,  62,  52,  43,  6,  16,  7,  28,  14,  25,  63,  58,  27,  4,  18,  57,  35,  42,  45,  44,  20,  19,  23,  37,  34,  2,  13,  39,  8,  9,  41,  47,  51,  15,  38,  10,  60,  54,  36,  61,  26,  12,  53,  32,  21,  48,  11,  29,  46,  56,  3,  33,  22
+
+//sum(real(ccorr)=6820
+20,  34,  46,  39,  25,  40,  60,  3,  10,  38,  32,  37,  28,  29,  43,  2,  5,  61,  0,  62,  49,  7,  12,  1,  41,  18,  14,  56,  51,  9,  53,  8,  55,  26,  15,  17,  23,  30,  11,  22,  48,  45,  63,  52,  47,  13,  57,  27,  4,  6,  35,  19,  24,  50,  21,  33,  54,  44,  58,  16,  36,  31,  42,  59,  15,  41,  13,  44,  28,  59,  31,  30,  23,  14,  25,  55,  63,  62,  48,  39,  40,  60,  46,  6,  38,  2,  10,  0,  22,  56,  26,  27,  34,  16,  51,  45,  8,  5,  3,  7,  47,  24,  21,  32,  43,  1,  9,  20,  18,  17,  36,  33,  12,  58,  53,  52,  35,  29,  50,  42,  61,  57,  19,  49,  11,  4,  37,  54
     };
 
 
@@ -890,13 +938,13 @@ void ModelChannel_AWGN_64_CSK(csk_t *csk,code_t *code, decoder_t *decoder, int *
                 u=My_drand48(init_rand);
                 v=My_drand48(init_rand);
                 /* BPSK modulation + AWGN noise (Box Muller method for Gaussian sampling) */
-                NoisyBin[q][i] = modulation[CCSK64[som+q]][i]+ sigma*sqrt(-2.0*log(u))*cos(2.0*PI*v)  ;
+                NoisyBin[q][i] = modulation[CCSK64[(som+q)%128]][i]+ sigma*sqrt(-2.0*log(u))*cos(2.0*PI*v)  ;
             }
         }
 
          for(k=0; k<code->GF; k++)
         {
-            TMP[k] =0;
+            TMP[k] =0.0;
         }
 
 
@@ -914,8 +962,14 @@ void ModelChannel_AWGN_64_CSK(csk_t *csk,code_t *code, decoder_t *decoder, int *
                     {
                         som = som + BinGF_64[k][q]*pow(2,q);
                     }
-                    TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-modulation[CCSK64[som+g]][0])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-modulation[CCSK64[som+g]][1])/(2.0*SQR(sigma));
+                    //TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-modulation[CCSK64[(som+g)%128]][0])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-modulation[CCSK64[(som+g)%128]][1])/(2.0*SQR(sigma));
                     //printf("%d %f \n",k, TMP[k]);
+
+                   //complex multiplication for correlation, compute real part
+                    // (a+ib)*conj(c+id)= ac + bd + i (bc -ad)
+                    TMP[k] = TMP[k]-( NoisyBin[g][0]*modulation[CCSK64[(som+g)%128]][0] + NoisyBin[g][1]*modulation[CCSK64[(som+g)%128]][1] ); //real part
+
+
                 }
             }
         }
@@ -933,8 +987,12 @@ void ModelChannel_AWGN_64_CSK(csk_t *csk,code_t *code, decoder_t *decoder, int *
                     {
                         som = som + BinGF_64[k][q]*pow(2,q);
                     }
-                    TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-modulation[CCSK64[som+g]][0])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-modulation[CCSK64[som+g]][1])/(2.0*SQR(sigma));
+                    //TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-modulation[CCSK64[(som+g)%128]][0])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-modulation[CCSK64[(som+g)%128]][1])/(2.0*SQR(sigma));
                     //printf("%d %f \n",k, TMP[k]);
+                    //complex multiplication for correlation, compute real part
+                    // (a+ib)*conj(c+id)= ac + bd + i (bc -ad)
+                    TMP[k] = TMP[k]-( NoisyBin[g][0]*modulation[CCSK64[(som+g)%128]][0] + NoisyBin[g][1]*modulation[CCSK64[(som+g)%128]][1] );// + SQR(  NoisyBin[g][1] * modulation[CCSK64[(som+g)%128]][0] -  NoisyBin[g][0]*modulation[CCSK64[(som+g)%128]][1]        );
+
                 }
             }
         }
@@ -962,16 +1020,16 @@ void ModelChannel_CHU_CSK(float *chu_real,float *chu_imag, csk_t *csk,code_t *co
     float TMP[code->GF];
     int som;
     //int transmited = csk->PNsize;
-    int transmited = 1;
-    int mapping_step =3;
-    int mappinp_start =9;
+    int transmited = 128 ;
+    int mapping_step =2;
+    int mappinp_start =0;
 
     float **NoisyBin = calloc(transmited,sizeof(float *));
     for (q=0; q<transmited; q++) NoisyBin[q] = calloc(2,sizeof(float));
     int i;
 
-    //sigma = sqrt(1.0/(2.0*pow(10,EbN/10.0)));
-    sigma = sqrt(1.0/pow(10,EbN/10.0));
+    sigma = sqrt(1.0/(2.0*pow(10,EbN/10.0)));
+    //sigma = sqrt(1.0/pow(10,EbN/10.0));
 
     for (n=0; n<N; n++)
     {
@@ -1008,8 +1066,14 @@ void ModelChannel_CHU_CSK(float *chu_real,float *chu_imag, csk_t *csk,code_t *co
                             //som = som + BinGF_256[k][q]*pow(2,q);
                             som = som + BinGF_64[k][q]*pow(2,q);
                         }
-                        TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-chu_real[(mappinp_start+som*mapping_step+g)%csk->PNsize])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-chu_imag[(mappinp_start+som*mapping_step+g)%csk->PNsize])/(2.0*SQR(sigma));
+                        //TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-chu_real[(mappinp_start+som*mapping_step+g)%csk->PNsize])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-chu_imag[(mappinp_start+som*mapping_step+g)%csk->PNsize])/(2.0*SQR(sigma));
                         //printf("%d %f \n",k, TMP[k]);
+
+                    //complex multiplication for correlation, compute real part
+                    // (a+ib)*conj(c+id)= ac + bd + i (bc -ad)
+                    TMP[k] = TMP[k]-( NoisyBin[g][0]*chu_real[(mappinp_start+som*mapping_step+g)%csk->PNsize]     + NoisyBin[g][1]*chu_imag[(mappinp_start+som*mapping_step+g)%csk->PNsize]    );// + SQR(  NoisyBin[g][1] * modulation[CCSK64[(som+g)%128]][0] -  NoisyBin[g][0]*modulation[CCSK64[(som+g)%128]][1]        );
+
+
                     }
                 }
         }
@@ -1026,8 +1090,10 @@ void ModelChannel_CHU_CSK(float *chu_real,float *chu_imag, csk_t *csk,code_t *co
                             //som = som + BinGF_256[k][q]*pow(2,q);
                             som = som + BinGF_64[k][q]*pow(2,q);
                         }
-                        TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-chu_real[(mappinp_start+som*mapping_step+g)%csk->PNsize])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-chu_imag[(mappinp_start+som*mapping_step+g)%csk->PNsize])/(2.0*SQR(sigma));
+                        //TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-chu_real[(mappinp_start+som*mapping_step+g)%csk->PNsize])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-chu_imag[(mappinp_start+som*mapping_step+g)%csk->PNsize])/(2.0*SQR(sigma));
                         //printf("%d %f \n",k, TMP[k]);
+                        TMP[k] = TMP[k]-( NoisyBin[g][0]*chu_real[(mappinp_start+som*mapping_step+g)%csk->PNsize]     + NoisyBin[g][1]*chu_imag[(mappinp_start+som*mapping_step+g)%csk->PNsize]    );// + SQR(  NoisyBin[g][1] * modulation[CCSK64[(som+g)%128]][0] -  NoisyBin[g][0]*modulation[CCSK64[(som+g)%128]][1]        );
+
                     }
                 }
         }
