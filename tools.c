@@ -282,7 +282,7 @@ int Encoding(code_t *code, table_t *table, int *CodeWord, int **NBIN, int *KSYMB
             NBIN[n][q] = table->BINGF[CodeWord[n]][q];
             //printf("%d ",table->BINGF[CodeWord[n]][q]);
         }
-
+        //printf(" %d ",CodeWord[n]);
     }
     //printf(" \n ");
     //getchar();
