@@ -1,16 +1,18 @@
 # Welcome to the c code for NB-LDPC simulation
 
-You can use this code to simulation NB-LDPC matrices using the Extented-Min Sum (EMS) algorithm. The Check Node (CN) is processed using Forward Backward(FB) algorithm. The FB algorithm splits CN   in elementary CNs (ECN)
+You can use this code to simulation NB-LDPC matrices using the Extented-Min Sum (EMS) algorithm.
+ The Check Node (CN) is processed using Forward Backward(FB) algorithm. The FB algorithm splits CN in elementary CNs (ECN)
 
 # usage
 
 ## input argument
- there are 7 arguments
+ there are 8 arguments
  1.		NbMonteCarlo     : # simulated frames
  1.		NbIterMax        : # of maximum decoding iteration
  1.		FileMatrix       : File name of the parity-check matrix
  1.		EbN              : Eb/No (dB)
- 1.		NbMax            : size of truncated messages
+ 1.		n_vc             : size of truncated messages from Variable to Check
+ 1.		n_cv			 : size of truncated messages from Check to Variable
  1.		Offset           : offset correction factor (0.4 -- 1)
  1.		NbOper           : Maximum number of operations for sorting
  
@@ -28,7 +30,7 @@ you may use CodeBlocks IDE
 
 in the Projet-> Set Programs' arguments
 
-> 2000 10 ./matrices/KN/N576_K480_GF64.txt 3.5 20 0.3 25
+> 2000 10 ./matrices/KN/N576_K480_GF64.txt 3.5 20 20 0.3 25
 
 ## Simulation on Linux
 
@@ -38,7 +40,7 @@ compile the c code using the makefile
 
 then run with appropriate parameters
 
-> ./essai 2000 10 ./matrices/KN/N576_K480_GF64.txt 3.5 20 0.3 25
+> ./essai 2000 10 ./matrices/KN/N576_K480_GF64.txt 3.5 20 20 0.3 25
 
 you may use the start.sh shell script to run simulation for multiple snr
 
@@ -54,7 +56,8 @@ you may use the start.sh shell script to run simulation for multiple snr
 >          NbIterMax        : 10
 >          FileMatrix       : ./matrices/KN/N576_K480_GF64.txt
 >          Eb/No (dB)       : 3.5
->          NbMax            : 20
+>          n_vc             : 20
+>		   n_cv				: 20
 >          Offset           : 0.3
 >          NbOper           : 25
 > 
