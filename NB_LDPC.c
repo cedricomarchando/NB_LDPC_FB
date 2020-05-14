@@ -25,7 +25,7 @@
 
 /// preprocessing directives
 //#define CCSK // use of Code-shift keying modulation
-//#define stat_ecn
+
 
 
 /*!
@@ -140,19 +140,19 @@ int main(int argc, char * argv[])
     // CCSK: build CCSK table
     csk_t csk;
     //csk.PNsize =code.GF;
-    csk.PNsize = 256;
+    csk.PNsize = 1024;
     printf("\n\t PN is generated using an LFSR \n");
     allocate_csk(&csk, csk.PNsize);
     PNGenerator( &csk ); //generate a PN sequence for csk modulation
-    build_natural_csk_mapping(code.GF, &csk); //fills the csk_arr with shifted versions of PN sequence
-    //build_punctured_csk_mapping(code.GF,code.logGF, &csk, table.BINGF);
+    //build_natural_csk_mapping(code.GF, &csk); //fills the csk_arr with shifted versions of PN sequence
+    build_punctured_csk_mapping(code.GF,code.logGF, &csk, table.BINGF);
     //build_CSK_map(&code, &csk); //construction of a mapping without PN sequence
 
 
     float chu_real[csk.PNsize];
     float chu_imag[csk.PNsize];
-    //CHU_Generator(chu_real,chu_imag,csk.PNsize);
-    CHU_AM_Generator(chu_real,chu_imag,csk.PNsize);
+    CHU_Generator(chu_real,chu_imag,csk.PNsize);
+    //CHU_AM_Generator(chu_real,chu_imag,csk.PNsize);
     //CHU_Generator_64apsk(chu_real,chu_imag,csk.PNsize);
     //CHU_Generator_256apsk(chu_real,chu_imag,csk.PNsize);
 
@@ -160,10 +160,8 @@ int main(int argc, char * argv[])
 
 
 
-    csk.PNsize = 256;  // for "short" CCSK mapping
+    csk.PNsize = 6;  // for "short" CCSK mapping
 
-    float  quantif_range_int_BPSK; //not used yet
-    float quantif_range_float_BPSK; //not used yet
     #endif
 
 
@@ -189,15 +187,6 @@ int main(int argc, char * argv[])
 
     decide=(int *)calloc(code.N,sizeof(int));
 
-
-#ifdef stat_ecn
-int stat_on = 0; // 0 if no stat , else ECN size, (decoder.nbMax)
-int stat_bubble[ 3 * (code.rowDegree[0]-2) * stat_on * stat_on ];// FWBF
-for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
-{
-    stat_bubble[i]=0;
-}
-#endif
 
 
     // check that dc is constant
@@ -244,8 +233,8 @@ for (i=0; i<3 * (code.rowDegree[0]-2) * stat_on * stat_on; i++)
 
         /* Noisy channel (AWGN)*/
         #ifdef CCSK
-        //ModelChannel_AWGN_BPSK_CSK (&csk,&code, &decoder, &table, CodeWord, EbN,&Idum, quantif_range_int_BPSK, quantif_range_float_BPSK);
-        ModelChannel_CHU_CSK(chu_real,chu_imag, &csk,&code, &decoder, NBIN, EbN, &Idum);
+        ModelChannel_AWGN_BPSK_CSK (&csk,&code, &decoder, &table, CodeWord, EbN,&Idum);
+        //ModelChannel_CHU_CSK(chu_real,chu_imag, &csk,&code, &decoder, NBIN, EbN, &Idum);
 
         //ModelChannel_AWGN_64_CSK (&csk,&code, &decoder, NBIN, EbN,&Idum);
         //ModelChannel_AWGN_256_CSK (&csk,&code, &decoder, NBIN, EbN,&Idum);
