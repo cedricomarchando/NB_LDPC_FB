@@ -26,6 +26,8 @@ static char usage_txt[] =
 	\n\t FileMatrix       : File name of the parity-check matrix\
 	\n\t EbN              : Eb/No (dB)\
 	\n\t NbMax            : size of truncated messages\
+	\n\t n_vc          : size of truncated messages from Variable to Check\
+    \n\t n_cv        : size of truncated messages from Check to Variable\
 	\n\t Offset           : offset correction factor (0.4 -- 1)\
 	\n\t NbOper           : Maximum number of operations for sorting \n\
 ";
