@@ -39,8 +39,8 @@ void PNGenerator( csk_t *csk)
 
         if(csk->PNsize == 64)
         {
-            a=32;
-            for(i=0; i<csk->PNsize; i++)
+            a=1;
+            for(i=0; i<csk->PNsize ; i++)
             {
                 //*******************************************
                 //** primitive polynomial x**6+x**5+x**4+x+1
@@ -54,13 +54,19 @@ void PNGenerator( csk_t *csk)
                 a = ((a << 1) + (LowBit & 1)) & 0x03F; //return shifted 6 bit value
                 //printf(" %d ",csk->PN[i] );
             }
-        //getchar();
+
+      /*      for(i=0; i<csk->PNsize; i++)
+            {
+                //csk->PN[i] = PN64[i];
+                printf(" %d ",(csk->PN[i]-1)/-2);
+            }
+        getchar();*/
         }
 
 
         if(csk->PNsize == 128)
         {
-            a=64;
+            a=1;
             for(i=0; i<csk->PNsize; i++)
             {
                 //*******************************************
@@ -83,7 +89,7 @@ void PNGenerator( csk_t *csk)
         // For GF(256) with polynomial P(x)=X^8+ X^4+X^3+X^2+1
         if(csk->PNsize == 256)
         {
-                    a=128;
+                    a=1;
             for(i=0; i<csk->PNsize; i++)
             {
                 csk->PN[i]=BPSK((a >> 7));//the output
@@ -134,7 +140,7 @@ void PNGenerator( csk_t *csk)
 // For GF(512) with polynomial P(x)=X^9+X^4+1
         if(csk->PNsize == 512)
         {
-                    a=256;
+                    a=1;
             for(i=0; i<csk->PNsize; i++)
             {
                 csk->PN[i]=BPSK((a >> 8));//the output
@@ -157,7 +163,7 @@ void PNGenerator( csk_t *csk)
 // For GF(1024) with polynomial P(x)=X^10+X^3+1
         if(csk->PNsize == 1024)
         {
-                    a=512;
+                    a=1;
             for(i=0; i<csk->PNsize; i++)
             {
                 csk->PN[i]=BPSK((a >> 9));//the output
@@ -182,7 +188,7 @@ void PNGenerator( csk_t *csk)
 // For GF(2048) with polynomial P(x)=X^11+X^2+1
         if(csk->PNsize == 2048)
         {
-                    a=1024;
+                    a=1;
             for(i=0; i<csk->PNsize; i++)
             {
                 csk->PN[i]=BPSK((a >> 10));//the output
@@ -202,7 +208,7 @@ void PNGenerator( csk_t *csk)
 // For GF(4096) with polynomial P(x)=X^12+X^9+X^7+X^6+1
         if(csk->PNsize == 4096)
         {
-                    a=2048;
+                    a=1;
             for(i=0; i<csk->PNsize; i++)
             {
                 csk->PN[i]=BPSK((a >> 11));//the output
@@ -504,7 +510,7 @@ Arguments:
     - csk : structure describing csk modulation parameters
 Return: void
 */
-void build_natural_csk_mapping(int GF, csk_t *csk)
+void build_natural_csk_mapping(int GF, csk_t *csk, int **BINGF)
 {
     int i, j;
 
@@ -531,10 +537,106 @@ void build_natural_csk_mapping(int GF, csk_t *csk)
     }
 
 
+        //check that all shifted PN are different
+    int bin_temp[12];
+    int GF_temp;
+    int GF_check[GF];
+    int logGF = log2(GF);
+    int pi_permut[GF];
+    for (i=0; i<GF; i++){GF_check[i]=0;}
+
+    for (i=0; i<GF; i++)
+    {
+
+        for (j=0; j<logGF; j++)
+        {
+            bin_temp[j]=(csk->CSK_arr[i][j] -1)/-2;
+          //  printf("%d ",bin_temp[j]);
+        }
+        GF_temp = Bin2GF(bin_temp,GF,logGF,BINGF);
+        GF_check[GF_temp]=GF_check[GF_temp] + 1;
+        //printf(" = %d \t", GF_temp);
+        pi_permut[i]=GF_temp;
+
+    }
+    //for (i=0; i<GF; i++){printf("%d ",GF_check[i]);}
+    //printf("\n");
+    //for (i=0; i<GF; i++){printf("%d \t",pi_permut[i]);}
+
+    //getchar();
+
+
+//permut CSK_arr such that punctured p et equivalent to BPSK
+     for (i=0; i<GF; i++)
+    { //printf(" \n %d:",i);
+
+        for (j=0; j<csk->PNsize; j++)
+        {
+            csk->CSK_arr[pi_permut[i]][j]=csk->PN[(j+i)%csk->PNsize];;
+            //printf("%d ",(csk->CSK_arr[i][j]+1)/2 );
+
+        }
+        //printf(" \n ");
+    }
+
+
+//    // check the result
+//    for (i=0; i<GF; i++)
+//    { printf(" \n %d:",i);
+//
+//        for (j=0; j<logGF; j++)
+//        {
+//            printf("%d ",(csk->CSK_arr[i][j]-1)/(-2) );
+//
+//        }
+//        printf(" \n ");
+//    }
+//
+//
+//    getchar();
+
+
+    printf("Filling CSK_arr: Success\n");
+    fflush(stdout);
+}
+
+
+void build_equidistant_csk_mapping(int GF, csk_t *csk, int **BINGF)
+{
+    int i, j,step;
+
+    for (i=0; i<csk->PNsize; i++)
+    {
+        csk->CSK_arr[0][i]=csk->PN[i];
+        //printf("%d ",csk->PN[i] );
+
+    }
+
+//getchar();
+step=csk->PNsize/GF;
+
+    for (i=1; i<GF; i++)
+    { //printf(" \n %d:",i);
+
+        for (j=0; j<csk->PNsize; j++)
+        {
+            csk->CSK_arr[i][j]=csk->PN[(j+i*step)%csk->PNsize];
+            //printf("%d ",(csk->CSK_arr[i][j]+1)/2 );
+
+        }
+        //printf(" \n ");
+    }
+
+
+
+
+
     //getchar();
     printf("Filling CSK_arr: Success\n");
     fflush(stdout);
 }
+
+
 
 
 // search in the csk array the GF indices giving first logGF bits that are different
@@ -567,14 +669,46 @@ void build_punctured_csk_mapping(int GF,int logGF, csk_t *csk, int **BINGF)
             }
             GF_selected[GF_temp]=1;
             //printf("CSK_index: %d \t GF_temp:%d \t PN_index:%d \n",i,GF_temp,PN_index); //getchar();
+            //printf("%d ",i); //getchar();
+
             PN_index = PN_index + 1;
+
         }
+
+
         //printf(" \n ");
     }
 
+//
+//    //check that all shifted PN are different
+//    for (i=0; i<GF; i++)
+//    {
+//
+//        for (j=0; j<logGF; j++)
+//        {
+//            bin_temp[j]=(csk->CSK_arr[i][j] +1)/2;
+//            //printf("%d ",bin_temp[j]);
+//        }
+//        GF_temp = Bin2GF(bin_temp,GF,logGF,BINGF);
+//
+//        printf(" %d \n", GF_temp);
+//
+//    }
+//    getchar();
+
+
+
+
+
+
+        if (PN_index < GF )
+        {
+            printf("error in build_punctured_csk_mapping: nb_index_found < GF_size !" ); getchar();
+        }
+
 
     //getchar();
-    printf("build_punctured_mapping: Success\n");
+    printf("\n build_punctured_mapping: Success\n");
     fflush(stdout);
 }
 
@@ -783,7 +917,7 @@ void ModelChannel_AWGN_BPSK_CSK (csk_t *csk, code_t *code, decoder_t *decoder, t
             TMP[g]=0.0;
             for (q=0; q<csk->PNsize; q++)
             {
-                temp = NoisyBin[n][q] *   csk->CSK_arr[g][q];
+                temp = NoisyBin[n][q] *   csk->CSK_arr[g][q]; //convolution
                 //temp = SQR(NoisyBin[n][q]+ csk->CSK_arr[g][q])/(2.0*SQR(sigma));
                 //temp = -SQR(NoisyBin[n][q]- csk->CSK_arr[g][q])/(2.0*SQR(sigma)); //distance
                 TMP[g] = TMP[g] - temp;
@@ -962,12 +1096,12 @@ void ModelChannel_AWGN_64_CSK(csk_t *csk,code_t *code, decoder_t *decoder, int *
                     {
                         som = som + BinGF_64[k][q]*pow(2,q);
                     }
-                    //TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-modulation[CCSK64[(som+g)%128]][0])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-modulation[CCSK64[(som+g)%128]][1])/(2.0*SQR(sigma));
+                    TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-modulation[CCSK64[(som+g)%128]][0])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-modulation[CCSK64[(som+g)%128]][1])/(2.0*SQR(sigma));
                     //printf("%d %f \n",k, TMP[k]);
 
                    //complex multiplication for correlation, compute real part
                     // (a+ib)*conj(c+id)= ac + bd + i (bc -ad)
-                    TMP[k] = TMP[k]-( NoisyBin[g][0]*modulation[CCSK64[(som+g)%128]][0] + NoisyBin[g][1]*modulation[CCSK64[(som+g)%128]][1] ); //real part
+                    //TMP[k] = TMP[k]-( NoisyBin[g][0]*modulation[CCSK64[(som+g)%128]][0] + NoisyBin[g][1]*modulation[CCSK64[(som+g)%128]][1] ); //real part
 
 
                 }
@@ -1020,7 +1154,7 @@ void ModelChannel_CHU_CSK(float *chu_real,float *chu_imag, csk_t *csk,code_t *co
     float TMP[code->GF];
     int som;
     //int transmited = csk->PNsize;
-    int transmited = 128 ;
+    int transmited = 4 ;
     int mapping_step =2;
     int mappinp_start =0;
 
@@ -1066,12 +1200,12 @@ void ModelChannel_CHU_CSK(float *chu_real,float *chu_imag, csk_t *csk,code_t *co
                             //som = som + BinGF_256[k][q]*pow(2,q);
                             som = som + BinGF_64[k][q]*pow(2,q);
                         }
-                        //TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-chu_real[(mappinp_start+som*mapping_step+g)%csk->PNsize])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-chu_imag[(mappinp_start+som*mapping_step+g)%csk->PNsize])/(2.0*SQR(sigma));
+                        TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-chu_real[(mappinp_start+som*mapping_step+g)%csk->PNsize])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-chu_imag[(mappinp_start+som*mapping_step+g)%csk->PNsize])/(2.0*SQR(sigma));
                         //printf("%d %f \n",k, TMP[k]);
 
                     //complex multiplication for correlation, compute real part
                     // (a+ib)*conj(c+id)= ac + bd + i (bc -ad)
-                    TMP[k] = TMP[k]-( NoisyBin[g][0]*chu_real[(mappinp_start+som*mapping_step+g)%csk->PNsize]     + NoisyBin[g][1]*chu_imag[(mappinp_start+som*mapping_step+g)%csk->PNsize]    );// + SQR(  NoisyBin[g][1] * modulation[CCSK64[(som+g)%128]][0] -  NoisyBin[g][0]*modulation[CCSK64[(som+g)%128]][1]        );
+                    //TMP[k] = TMP[k]-( NoisyBin[g][0]*chu_real[(mappinp_start+som*mapping_step+g)%csk->PNsize]     + NoisyBin[g][1]*chu_imag[(mappinp_start+som*mapping_step+g)%csk->PNsize]    );// + SQR(  NoisyBin[g][1] * modulation[CCSK64[(som+g)%128]][0] -  NoisyBin[g][0]*modulation[CCSK64[(som+g)%128]][1]        );
 
 
                     }
