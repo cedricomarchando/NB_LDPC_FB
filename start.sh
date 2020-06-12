@@ -1,7 +1,7 @@
 # la commande d'exécution est:
 # ./nom_du_fichier_binaire nombre_de_trame nombre_iteration nom_de_la_matrice EbN nm offset nombre_operation_dans_ecn
 # script to lunch multiple SNR
-# if edited in window, dos2linux file.sh
+# if edited in window, dos2linux file.sh, or dos2unix
 #! /bin/bash
 echo "Bash version ${BASH_VERSION}..."
 nb_frame=2000000000
@@ -16,7 +16,7 @@ LANG="en_US.utf8" #define us language to have floating point with point with a p
 
 echo "start multiple decoding"
 
-for SNR in $(seq 0.0 0.2 0.4)
+for SNR in $(seq -1.2 0.2 0.2)
 do
   echo "simulation with SNR= $SNR "
   xterm -xrm '*hold:true' -e ./essai $nb_frame $it ${matrix} $SNR $n_vc $n_vc $offset $nb_oper &
