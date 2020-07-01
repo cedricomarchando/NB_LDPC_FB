@@ -1,7 +1,7 @@
 # Welcome to the c code for NB-LDPC simulation
 
-You can use this code to simulation NB-LDPC matrices using the Extented-Min Sum (EMS) algorithm.
- The Check Node (CN) is processed using Forward Backward(FB) algorithm. The FB algorithm splits CN in elementary CNs (ECN)
+You can use this code to simulate NB-LDPC matrices using the Extented-Min Sum (EMS) algorithm.
+ The Check Node (CN) is processed using Forward Backward(FB) algorithm. The FB algorithm splits CN in elementary CNs (ECN).
 
 # usage
 
@@ -12,13 +12,13 @@ You can use this code to simulation NB-LDPC matrices using the Extented-Min Sum 
  1.		FileMatrix       : File name of the parity-check matrix
  1.		EbN              : Eb/No (dB)
  1.		n_vc             : size of truncated messages from Variable to Check
- 1.		n_cv			 : size of truncated messages from Check to Variable
+ 1.		n_cv	            : size of truncated messages from Check to Variable
  1.		Offset           : offset correction factor (0.4 -- 1)
  1.		NbOper           : Maximum number of operations for sorting
  
  ## output
 
-Frame Error Rate for the given simulation parameters
+Frame Error Rate (FER) and Bit Error Rate (BER) and average number of iterations for the given simulation parameters
 
 ## input and output files
  * Input File : 'FileMatrix' is an ASCII file with the parity-check matrix description in aList format.
