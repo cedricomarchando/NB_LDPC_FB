@@ -55,12 +55,12 @@ void PNGenerator( csk_t *csk)
                 //printf(" %d ",csk->PN[i] );
             }
 
-      /*      for(i=0; i<csk->PNsize; i++)
-            {
-                //csk->PN[i] = PN64[i];
-                printf(" %d ",(csk->PN[i]-1)/-2);
-            }
-        getchar();*/
+           // for(i=0; i<csk->PNsize; i++)
+           // {
+           //     csk->PN[i] = PN64[i];
+           //     printf(" %d ",(csk->PN[i]-1)/-2);
+           // }
+        //getchar();
         }
 
 
@@ -252,8 +252,8 @@ void CHU_Generator( float *chu_real,float *chu_imag,int N)
 
         for (i=0; i<N; i++)
         {
-            chu_real[i] = cos( i*R*(i)*PI /N);
-            chu_imag[i] = sin( i*R*(i)*PI /N);
+            chu_real[i] = cos( i*R*(i+1)*PI /N);
+            chu_imag[i] = sin( i*R*(i+1)*PI /N);
             //printf(" real:%f \t imag:%f ",chu_real[i],chu_imag[i]); getchar();
         }
     printf(" \n CHU generation: Success\n");
@@ -746,18 +746,24 @@ void build_CSK_map(code_t *code, csk_t *csk)
 //        }
 //    }
 
-
+int sequence_tmp[300];
        // repeat construction
     for (i=0; i<code->GF; i++)
     {
-        for (j=0; j<csk->PNsize / code->logGF; j++)
+        for (j=0; j<csk->PNsize / code->logGF +1; j++)
         {
             for (k=0;k<code->logGF;k++ )
             {
                 tmp1=(i>>k) & 0x01;
                 //printf("CSK[%d][%d] = %d \n ",i,j*code->logGF + k, tmp1 );
-                csk->CSK_arr[i][j*code->logGF + k]= BPSK(tmp1);
+                //csk->CSK_arr[i][j*code->logGF + k]= BPSK(tmp1);
+                sequence_tmp[j*code->logGF + k]= BPSK(tmp1);
             }
+        }
+        for (j=0; j<csk->PNsize; j++)
+        {
+            csk->CSK_arr[i][j]= sequence_tmp[j];
+            //printf("CSK[%d][%d] = %d \n ",i,j, csk->CSK_arr[i][j]);
         }
         //getchar();
     }
@@ -930,7 +936,7 @@ void ModelChannel_AWGN_BPSK_CSK (csk_t *csk, code_t *code, decoder_t *decoder, t
     }
 
 //    // !!!!! for hybrid CCSK
-//    for (n=0; n<N/2; n++)
+//    for (n=N/2; n<N; n++)
 //    {
 //        for (g=0; g<code->GF; g++)
 //        {
@@ -946,6 +952,25 @@ void ModelChannel_AWGN_BPSK_CSK (csk_t *csk, code_t *code, decoder_t *decoder, t
 //            decoder->intrinsic_LLR[n][k] = TMP[k];
 //        }
 //    }
+
+//    // !!!!! for hybrid CCSK with over-puncturing on redundant symbols
+//    for (n=code->K; n<N; n++)
+//    {
+//        for (g=0; g<code->GF; g++)
+//        {
+//            TMP[g]=0.0;
+//            for (q=0; q<2; q++)
+//            {
+//                temp = NoisyBin[n][q] *   csk->CSK_arr[g][q];
+//                TMP[g] = TMP[g] - temp;
+//            }
+//        }
+//        for(k=0; k<code->GF; k++)
+//        {
+//            decoder->intrinsic_LLR[n][k] = TMP[k];
+//        }
+//    }
+
 
 
 
@@ -1154,8 +1179,8 @@ void ModelChannel_CHU_CSK(float *chu_real,float *chu_imag, csk_t *csk,code_t *co
     float TMP[code->GF];
     int som;
     //int transmited = csk->PNsize;
-    int transmited = 4 ;
-    int mapping_step =2;
+    int transmited = 1 ;
+    int mapping_step =1;
     int mappinp_start =0;
 
     float **NoisyBin = calloc(transmited,sizeof(float *));
@@ -1165,7 +1190,7 @@ void ModelChannel_CHU_CSK(float *chu_real,float *chu_imag, csk_t *csk,code_t *co
     sigma = sqrt(1.0/(2.0*pow(10,EbN/10.0)));
     //sigma = sqrt(1.0/pow(10,EbN/10.0));
 
-    for (n=0; n<N; n++)
+    for (n=0; n<4*N/5; n++)
     {
         som=0;
         for (q=0; q<code->logGF; q++)
@@ -1385,10 +1410,8 @@ float table_GF[code->GF][2];
                         TMP[k] =0;
                     }
 
-        if (n<N)
+        if (n < N) // no per symbol puncturing: -1 , half:  N/2
         {
-
-
                     for (q=0; q<csk->PNsize; q++)
                     {
                         for (i=0; i<2; i++)
@@ -1418,7 +1441,7 @@ float table_GF[code->GF][2];
         else
         {
 
-                    for (q=0; q<csk->PNsize; q++)
+                    for (q=0; q<csk->PNsize-1; q++)
                     {
                         for (i=0; i<2; i++)
                         {
@@ -1447,12 +1470,15 @@ float table_GF[code->GF][2];
 
 
 
-        //getchar();
+
         for(k=0; k<code->GF; k++)
         {
             decoder->intrinsic_LLR[n][k] = TMP[k];
         }
     }
+
+
+
 
     for (q=0; q<csk->PNsize; q++) free(NoisyBin[q]);
     free(NoisyBin);
