@@ -24,7 +24,7 @@
 #include "./include/NB_LDPC.h"
 
 /// preprocessing directives
-//#define CCSK // use of Code-shift keying modulation
+#define CCSK // use of Code-shift keying modulation
 
 
 
@@ -127,7 +127,7 @@ int main(int argc, char * argv[])
 
 // output results in a file
     FILE *opfile;
-    char note[40]="FB30";
+    char note[40]="K120GF64_CCSK";
     printf("\n\t Note             : %s\n",note);
     char file_name [70];
     time_t start_time;
@@ -140,13 +140,21 @@ int main(int argc, char * argv[])
     // CCSK: build CCSK table
     csk_t csk;
     //csk.PNsize =code.GF;
-    csk.PNsize = 1024;
+    csk.PNsize = 64;
     printf("\n\t PN is generated using an LFSR \n");
     allocate_csk(&csk, csk.PNsize);
     PNGenerator( &csk ); //generate a PN sequence for csk modulation
-    //build_natural_csk_mapping(code.GF, &csk); //fills the csk_arr with shifted versions of PN sequence
-    build_punctured_csk_mapping(code.GF,code.logGF, &csk, table.BINGF);
+    build_natural_csk_mapping(code.GF, &csk, table.BINGF ); //fills the csk_arr with shifted versions of PN sequence
+    //build_equidistant_csk_mapping(code.GF, &csk, table.BINGF);//optimized for 1024
+    //build_punctured_csk_mapping(code.GF,code.logGF, &csk, table.BINGF);
     //build_CSK_map(&code, &csk); //construction of a mapping without PN sequence
+
+
+
+
+
+
+
 
 
     float chu_real[csk.PNsize];
@@ -160,7 +168,7 @@ int main(int argc, char * argv[])
 
 
 
-    csk.PNsize = 6;  // for "short" CCSK mapping
+    csk.PNsize = 64;  // for "short" CCSK mapping
 
     #endif
 
@@ -242,9 +250,9 @@ int main(int argc, char * argv[])
         #endif
         #ifndef CCSK
             ModelChannel_AWGN_BPSK (&code, &decoder, &table,  NBIN, EbN,&Idum);
+           // ModelChannel_AWGN_BPSK_repeat (&code, &decoder, &table,  NBIN, EbN,&Idum);
         //ModelChannel_AWGN_64 (&code, &decoder, NBIN, EbN,&Idum);
         //ModelChannel(&code, &decoder,  NBIN, EbN,&Idum);
-        //ModelChannel_AWGN_256QAM_4D (&code, &decoder, NBIN, EbN,&Idum);
         #endif
 
 
