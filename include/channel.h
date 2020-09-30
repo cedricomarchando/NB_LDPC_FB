@@ -16,6 +16,7 @@
 
 void ModelChannel_AWGN_BPSK (code_t *code, decoder_t *decoder, table_t *table,  int **NBIN, float EbN, int *init_rand);
 
+void ModelChannel_AWGN_BPSK_repeat (code_t *code, decoder_t *decoder, table_t *table, int **NBIN, float EbN,int *init_rand);
 
 void ModelChannel_AWGN_64 (code_t *code, decoder_t *decoder, int **NBIN, float EbN, int *init_rand);
 
