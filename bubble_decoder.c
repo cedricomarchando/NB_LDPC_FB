@@ -256,25 +256,41 @@ void CheckPassLogEMS (int node,decoder_t *decoder, code_t *code, table_t *table,
 //printf("sat=%0.3f \n", decoder->M_CtoV_LLR[t][Stp-1] + offset );
 //getchar();
 
-
-        for(k=0; k<code->GF; k++)
+        if ( decoder->M_CtoV_LLR[t][Stp-1]>0)
         {
-            LLR_tmp[k] = decoder->M_CtoV_LLR[t][Stp-1] + offset;
-        }
+                for(k=0; k<code->GF; k++)
+                {
+                    LLR_tmp[k] = decoder->M_CtoV_LLR[t][Stp-1] + offset;
+                }
 
-        for(k=0; k<Stp; k++)
+
+                for(k=0; k<Stp; k++)
+                {
+                    LLR_tmp[decoder->M_CtoV_GF[t][k]]= decoder->M_CtoV_LLR[t][k];
+                }
+
+
+
+                for(k=0; k<code->GF; k++)
+                {
+                    //decoder->M_CtoV_GF[t][k] = k;
+                    decoder->M_CtoV_LLR[t][k] = LLR_tmp[k];
+                }
+        }
+        else
         {
-            LLR_tmp[decoder->M_CtoV_GF[t][k]]= decoder->M_CtoV_LLR[t][k];
+
+                for(k=0; k<code->GF; k++)
+                {
+                    //decoder->M_CtoV_GF[t][k] = k;
+                    decoder->M_CtoV_LLR[t][k] = 0;
+                }
         }
-
-
 
         for(k=0; k<code->GF; k++)
         {
             decoder->M_CtoV_GF[t][k] = k;
-            decoder->M_CtoV_LLR[t][k] = LLR_tmp[k];
         }
-
 
     }
 
@@ -533,7 +549,8 @@ int ElementaryStep(float *Input1,float *Input2,int *IndiceInput1,int *IndiceInpu
         for (j=nb_bubble>>1; j<nmV; j++)
         {
             tab_aux[i][j] = Input1[i]+Input2[j]; // min-sim algorithm
-//                        // min-max algorithm
+
+//              //           min-max algorithm
 //            if (Input1[i]>Input2[j])
 //            {
 //             tab_aux[i][j] = Input1[i];
