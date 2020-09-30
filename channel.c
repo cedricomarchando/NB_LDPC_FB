@@ -47,8 +47,8 @@ void ModelChannel_AWGN_BPSK (code_t *code, decoder_t *decoder, table_t *table, i
 
     /* Binary-input AWGN channel : */
 
-    sigma = sqrt(1.0/(2.0*code->rate*pow(10,EbN/10.0)));  // considering EbNo
-  //  sigma = sqrt(1.0/(pow(10,EbN/10.0))); // considering SNR
+    //sigma = sqrt(1.0/(2*code->rate*pow(10,EbN/10.0)));  // considering EbNo
+    sigma = sqrt(1.0/(pow(10,EbN/10.0))); // considering SNR
     for (n=0; n<N; n++)
     {
         for (q=0; q<logGF; q++)
@@ -105,6 +105,102 @@ void ModelChannel_AWGN_BPSK (code_t *code, decoder_t *decoder, table_t *table, i
     for (n=0; n<N; n++) free(NoisyBin[n]);
     free(NoisyBin);
 }
+
+
+
+
+
+
+void ModelChannel_AWGN_BPSK_repeat (code_t *code, decoder_t *decoder, table_t *table, int **NBIN, float EbN,int *init_rand)
+{
+    const int N = code->N;
+    const int logGF = code->logGF;
+    int n,k,g,q;
+    float u,v,sigma;
+    float TMP[4096];
+
+    float **NoisyBin = calloc(N,sizeof(float *));
+    for (n=0; n<N; n++) NoisyBin[n] = calloc(logGF,sizeof(float));
+    int repeat=12;
+    int r;
+
+    /* Binary-input AWGN channel : */
+
+    //sigma = sqrt(1.0/(2.0*code->rate*pow(10,EbN/10.0)));  // considering EbNo
+    sigma = sqrt(1.0/(pow(10,EbN/10.0))); // considering SNR
+    for (n=0; n<N; n++)
+    {
+
+for (g=0; g<code->GF; g++){TMP[g]=0.0;}
+        for (r=0; r<repeat;r++)
+        {
+
+
+
+
+                for (q=0; q<logGF; q++)
+                {
+
+                    u=My_drand48(init_rand);
+                    while(u==0.0)
+                    {
+                        u=My_drand48(init_rand);
+                    }
+                    v=My_drand48(init_rand);
+                    /* BPSK modulation + AWGN noise (Box Muller method for Gaussian sampling) */
+                    NoisyBin[n][q] = BPSK(NBIN[n][q]) + sigma*sqrt(-2.0*log(u))*cos(2.0*PI*v);
+                }
+
+           // }
+
+
+            /* Compute the Log intrinsic_LLR Ratio messages */
+          //  for (n=0; n<N; n++)
+          //  {
+                for (g=0; g<code->GF; g++)
+                {
+                    //TMP[g]=0.0;
+                    for (q=0; q<logGF; q++)
+                    {
+                        //TMP[g] = TMP[g] + SQR(NoisyBin[n][q]-BPSK(table->BINGF[g][q]))/(2.0*SQR(sigma));
+                        TMP[g] = TMP[g] - NoisyBin[n][q]*BPSK(table->BINGF[g][q]);
+                    }
+
+                }
+
+
+        }
+
+
+        for(k=0; k<code->GF; k++)
+        {
+//            decoder->intrinsic_LLR[n][k] = +1e5;
+//            decoder->intrinsic_GF[n][k] = -1;
+//            for (g=0; g<code->GF; g++)
+//            {
+//                if (TMP[g] < decoder->intrinsic_LLR[n][k])
+//                {
+//                    decoder->intrinsic_LLR[n][k] = TMP[g];
+//                    decoder->intrinsic_GF[n][k] = g;
+//                }
+//            }
+//            TMP[decoder->intrinsic_GF[n][k]] = +1e5;
+
+
+            decoder->intrinsic_LLR[n][k] = TMP[k]/ repeat;
+        }
+
+
+    }
+
+    for (n=0; n<N; n++) free(NoisyBin[n]);
+    free(NoisyBin);
+}
+
+
+
+
+
 
 
 
