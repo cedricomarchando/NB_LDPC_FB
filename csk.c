@@ -39,28 +39,28 @@ void PNGenerator( csk_t *csk)
 
         if(csk->PNsize == 64)
         {
-            a=1;
-            for(i=0; i<csk->PNsize ; i++)
-            {
-                //*******************************************
-                //** primitive polynomial x**6+x**5+x**4+x+1
-                //*******************************************
-                csk->PN[i]=BPSK((a >> 5));//the output
-                //feedback and shift
-                LowBit = a >> 5; //x**6 term
-                LowBit = LowBit ^ (a >> 4); //x**5 term
-                LowBit = LowBit ^ (a >> 3); //x**4 term
-                LowBit = LowBit ^ a; //x term
-                a = ((a << 1) + (LowBit & 1)) & 0x03F; //return shifted 6 bit value
-                //printf(" %d ",csk->PN[i] );
-            }
+//            a=1;
+//            for(i=0; i<csk->PNsize ; i++)
+//            {
+//                //*******************************************
+//                //** primitive polynomial x**6+x**5+x**4+x+1
+//                //*******************************************
+//                csk->PN[i]=BPSK((a >> 5));//the output
+//                //feedback and shift
+//                LowBit = a >> 5; //x**6 term
+//                LowBit = LowBit ^ (a >> 4); //x**5 term
+//                LowBit = LowBit ^ (a >> 3); //x**4 term
+//                LowBit = LowBit ^ a; //x term
+//                a = ((a << 1) + (LowBit & 1)) & 0x03F; //return shifted 6 bit value
+//                //printf(" %d ",csk->PN[i] );
+//            }
 
-           // for(i=0; i<csk->PNsize; i++)
-           // {
-           //     csk->PN[i] = PN64[i];
-           //     printf(" %d ",(csk->PN[i]-1)/-2);
-           // }
-        //getchar();
+            for(i=0; i<csk->PNsize; i++)
+            {
+                csk->PN[i] = PN64[i];
+                printf(" %d ",(csk->PN[i]-1)/-2);
+            }
+        getchar();
         }
 
 
@@ -1018,22 +1018,7 @@ void ModelChannel_AWGN_64_CSK(csk_t *csk,code_t *code, decoder_t *decoder, int *
 
     float modulation[code->GF][2];
 
-    const int CCSK64[128]={
-
-  //      0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,
-  //  41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,
-
-
-//            2,57,33,29,26,4,58,10,27,43,37,7,19,20,0,63,6,51,8,36,9,62,53,15,18,23,5,34,13,55,45,16,46,35,48,21,61,22,40,12,56,47,24,1,39,
-//    41,42,44,38,59,32,49,30,17,50,52,11,54,14,3,60,31,25,28,
-//
-//    0,21,61,48,2,8,57,49,19,14,62,53,16,6,20,45,22,24,26,54,28,30,1,5,59,10,60,43,55,32,11,46,18,34,52,36,9,38,12,58,40,
-//    23,25,50,27,42,13,51,29,31,56,4,33,17,44,3,63,35,37,39,41,15,47,7
-
-
-
-//    0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,
-//    41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63
+ //   const int CCSK64[128]={
 
 
 ////new max 179
@@ -1057,9 +1042,13 @@ void ModelChannel_AWGN_64_CSK(csk_t *csk,code_t *code, decoder_t *decoder, int *
 //32,  46,  62,  60,  39,  27,  35,  23,  22,  8,  29,  10,  53,  19,  18,  13,  42,  54,  45,  36,  44,  0,  6,  59,  16,  55,  28,  63,  9,  3,  51,  61,  56,  11,  25,  49,  41,  40,  14,  52,  43,  38,  31,  50,  1,  4,  17,  26,  21,  15,  58,  7,  5,  2,  37,  57,  24,  34,  20,  30,  12,  33,  48,  47,  0,  30,  55,  24,  31,  59,  49,  40,  5,  17,  1,  50,  62,  52,  43,  6,  16,  7,  28,  14,  25,  63,  58,  27,  4,  18,  57,  35,  42,  45,  44,  20,  19,  23,  37,  34,  2,  13,  39,  8,  9,  41,  47,  51,  15,  38,  10,  60,  54,  36,  61,  26,  12,  53,  32,  21,  48,  11,  29,  46,  56,  3,  33,  22
 
 //sum(real(ccorr)=6820
-20,  34,  46,  39,  25,  40,  60,  3,  10,  38,  32,  37,  28,  29,  43,  2,  5,  61,  0,  62,  49,  7,  12,  1,  41,  18,  14,  56,  51,  9,  53,  8,  55,  26,  15,  17,  23,  30,  11,  22,  48,  45,  63,  52,  47,  13,  57,  27,  4,  6,  35,  19,  24,  50,  21,  33,  54,  44,  58,  16,  36,  31,  42,  59,  15,  41,  13,  44,  28,  59,  31,  30,  23,  14,  25,  55,  63,  62,  48,  39,  40,  60,  46,  6,  38,  2,  10,  0,  22,  56,  26,  27,  34,  16,  51,  45,  8,  5,  3,  7,  47,  24,  21,  32,  43,  1,  9,  20,  18,  17,  36,  33,  12,  58,  53,  52,  35,  29,  50,  42,  61,  57,  19,  49,  11,  4,  37,  54
-    };
+ //   const int CCSK64[128]={20,  34,  46,  39,  25,  40,  60,  3,  10,  38,  32,  37,  28,  29,  43,  2,  5,  61,  0,  62,  49,  7,  12,  1,  41,  18,  14,  56,  51,  9,  53,  8,  55,  26,  15,  17,  23,  30,  11,  22,  48,  45,  63,  52,  47,  13,  57,  27,  4,  6,  35,  19,  24,  50,  21,  33,  54,  44,  58,  16,  36,  31,  42,  59,  15,  41,  13,  44,  28,  59,  31,  30,  23,  14,  25,  55,  63,  62,  48,  39,  40,  60,  46,  6,  38,  2,  10,  0,  22,  56,  26,  27,  34,  16,  51,  45,  8,  5,  3,  7,  47,  24,  21,  32,  43,  1,  9,  20,  18,  17,  36,  33,  12,  58,  53,  52,  35,  29,  50,  42,  61,  57,  19,  49,  11,  4,  37,  54
+//};
 
+int pn_size =64;
+
+const int CCSK64[64]={13,	62,	53,	35,	21,	36,	56,	45,	28,	54,	60,	23,	32,	16,	15,	19,	5,	24,	8,	11,	7,	22,	61,	2,	34,	25,	6,	20,	1,	37,	63,	58,	30,	9,	31,	12,	38,	27,	46,	29,	41,	49,	39,	18,	48,	17,	47,	55,	33,	40,	50,	42,	57,	14,	26,	51,	4,	43,	59,	64,	10,	3,	52,	44
+};
 
 
     ////compute normalization factor so that average power of one point of constellation is equal to one
@@ -1097,7 +1086,7 @@ void ModelChannel_AWGN_64_CSK(csk_t *csk,code_t *code, decoder_t *decoder, int *
                 u=My_drand48(init_rand);
                 v=My_drand48(init_rand);
                 /* BPSK modulation + AWGN noise (Box Muller method for Gaussian sampling) */
-                NoisyBin[q][i] = modulation[CCSK64[(som+q)%128]][i]+ sigma*sqrt(-2.0*log(u))*cos(2.0*PI*v)  ;
+                NoisyBin[q][i] = modulation[CCSK64[(som+q)%pn_size]][i]+ sigma*sqrt(-2.0*log(u))*cos(2.0*PI*v)  ;
             }
         }
 
@@ -1121,7 +1110,7 @@ void ModelChannel_AWGN_64_CSK(csk_t *csk,code_t *code, decoder_t *decoder, int *
                     {
                         som = som + BinGF_64[k][q]*pow(2,q);
                     }
-                    TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-modulation[CCSK64[(som+g)%128]][0])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-modulation[CCSK64[(som+g)%128]][1])/(2.0*SQR(sigma));
+                    TMP[k] = TMP[k]+SQR(NoisyBin[g][0]-modulation[CCSK64[(som+g)%pn_size]][0])/(2.0*SQR(sigma))+SQR(NoisyBin[g][1]-modulation[CCSK64[(som+g)%pn_size]][1])/(2.0*SQR(sigma));
                     //printf("%d %f \n",k, TMP[k]);
 
                    //complex multiplication for correlation, compute real part
@@ -1150,7 +1139,7 @@ void ModelChannel_AWGN_64_CSK(csk_t *csk,code_t *code, decoder_t *decoder, int *
                     //printf("%d %f \n",k, TMP[k]);
                     //complex multiplication for correlation, compute real part
                     // (a+ib)*conj(c+id)= ac + bd + i (bc -ad)
-                    TMP[k] = TMP[k]-( NoisyBin[g][0]*modulation[CCSK64[(som+g)%128]][0] + NoisyBin[g][1]*modulation[CCSK64[(som+g)%128]][1] );// + SQR(  NoisyBin[g][1] * modulation[CCSK64[(som+g)%128]][0] -  NoisyBin[g][0]*modulation[CCSK64[(som+g)%128]][1]        );
+                    TMP[k] = TMP[k]-( NoisyBin[g][0]*modulation[CCSK64[(som+g)%pn_size]][0] + NoisyBin[g][1]*modulation[CCSK64[(som+g)%pn_size]][1] );// + SQR(  NoisyBin[g][1] * modulation[CCSK64[(som+g)%128]][0] -  NoisyBin[g][0]*modulation[CCSK64[(som+g)%128]][1]        );
 
                 }
             }
