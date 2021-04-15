@@ -247,8 +247,13 @@ int Encoding(code_t *code, table_t *table, int *CodeWord, int **NBIN, int *KSYMB
     int temp[12];
     int i;
 
+
     for (k=0 ; k<N-M; k++)
-        NSYMB[M+k]=KSYMB[k];
+        {
+            NSYMB[M+k]=KSYMB[k];
+            //printf(" %d ",KSYMB[k]);
+        }
+        //getchar();
 
     /* Backsubstitution */
     for (m=M-1; m>=0; m--)
@@ -282,7 +287,7 @@ int Encoding(code_t *code, table_t *table, int *CodeWord, int **NBIN, int *KSYMB
             NBIN[n][q] = table->BINGF[CodeWord[n]][q];
             //printf("%d ",table->BINGF[CodeWord[n]][q]);
         }
-        //printf(" %d ",CodeWord[n]);
+        //printf("%d ",CodeWord[n]);
     }
     //printf(" \n ");
     //getchar();
