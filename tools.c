@@ -273,7 +273,7 @@ int Encoding(code_t *code, table_t *table, int *CodeWord, int **NBIN, int *KSYMB
         }
         /* Systematic codeword (interleaved) */
         NSYMB[m] = table->DIVGF[buf][code->matUT[m][m]];
-        }
+    }
 
     /* De-interleaving */
     for (n=0; n<N; n++)
