@@ -45,6 +45,8 @@ void ModelChannel_AWGN_64APSK_CSK256(csk_t *csk,code_t *code, decoder_t *decoder
 
 void ModelChannel_CHU_CSK(float *chu_real,float *chu_imag, csk_t *csk,code_t *code, decoder_t *decoder, int **NBIN, float EbN, int *init_rand);
 
+void ModelChannel_AWGN_64_8CSK(csk_t *csk,code_t *code, decoder_t *decoder, int **NBIN, float EbN, int *init_rand);
+
 // old
 //static const int PN64[64]={-1, 1, 1, 1, -1, -1, -1, -1, -1, 1, -1, 1, 1, -1, -1, 1, -1, 1, 1, 1, -1, 1, 1, 1, 1, -1, 1, 1, -1, 1, -1, 1, 1, -1, -1,
 // -1, 1, -1, -1, -1, 1, 1, -1, 1, 1, 1, -1, 1, 1, -1, -1, -1, -1, -1, 1, -1, 1, -1, 1, 1, 1, -1, -1, -1};
