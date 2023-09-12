@@ -79,7 +79,7 @@ int main(int argc, char * argv[])
     int node;
 
     int Idum=-1; // initialization of random generator
-    srand(5);
+    srand(2);
 
     /*
      * Command line arguments
@@ -127,20 +127,21 @@ int main(int argc, char * argv[])
 
 // output results in a file
     FILE *opfile;
-    char note[40]="K120GF64_CCSK";
+    char note[20]="GF64_CCSK";
     printf("\n\t Note             : %s\n",note);
-    char file_name [70];
+    char file_name [60];
     time_t start_time;
     time_t end_time;
     double exec_time;
     char* c_time_string;
 
+    //printf("press space to start!");getchar();
 
     #ifdef CCSK
     // CCSK: build CCSK table
     csk_t csk;
-    //csk.PNsize =code.GF;
-    csk.PNsize = 64;
+    csk.PNsize =code.GF;
+    //csk.PNsize = 64;
     printf("\n\t PN is generated using an LFSR \n");
     allocate_csk(&csk, csk.PNsize);
     PNGenerator( &csk ); //generate a PN sequence for csk modulation
@@ -157,9 +158,9 @@ int main(int argc, char * argv[])
 
 
 
-    float chu_real[csk.PNsize];
-    float chu_imag[csk.PNsize];
-    CHU_Generator(chu_real,chu_imag,csk.PNsize);
+    //float chu_real[csk.PNsize];
+    //float chu_imag[csk.PNsize];
+    //CHU_Generator(chu_real,chu_imag,csk.PNsize);
     //CHU_AM_Generator(chu_real,chu_imag,csk.PNsize);
     //CHU_Generator_64apsk(chu_real,chu_imag,csk.PNsize);
     //CHU_Generator_256apsk(chu_real,chu_imag,csk.PNsize);
@@ -168,12 +169,12 @@ int main(int argc, char * argv[])
 
 
 
-    csk.PNsize = 64;  // for "short" CCSK mapping
+    csk.PNsize = 6;  // for "punctured" CCSK mapping
 
     #endif
 
 
-    sprintf (file_name,"./data/results_N%d_CR%0.2f_GF%d_IT%d_Offset%0.1f_nm%d_%s.txt",code.N,code.rate,code.GF,NbIterMax, offset,decoder.n_cv,note);
+    sprintf (file_name,"./data/N%d_GF%d_nm%d_%s.txt",code.N,code.GF,decoder.n_cv,note);
 
 
     start_time = time(NULL);
@@ -244,14 +245,16 @@ int main(int argc, char * argv[])
         ModelChannel_AWGN_BPSK_CSK (&csk,&code, &decoder, &table, CodeWord, EbN,&Idum);
         //ModelChannel_CHU_CSK(chu_real,chu_imag, &csk,&code, &decoder, NBIN, EbN, &Idum);
 
+        //ModelChannel_AWGN_16_CSK (&csk,&code, &decoder, NBIN, EbN,&Idum);
         //ModelChannel_AWGN_64_CSK (&csk,&code, &decoder, NBIN, EbN,&Idum);
+        //ModelChannel_AWGN_64_8CSK(&csk,&code, &decoder, NBIN, EbN,&Idum);
         //ModelChannel_AWGN_256_CSK (&csk,&code, &decoder, NBIN, EbN,&Idum);
         //ModelChannel_AWGN_64APSK_CSK256(&csk,&code, &decoder, NBIN, EbN, &Idum);
         #endif
         #ifndef CCSK
-            ModelChannel_AWGN_BPSK (&code, &decoder, &table,  NBIN, EbN,&Idum);
+            //ModelChannel_AWGN_BPSK (&code, &decoder, &table,  NBIN, EbN,&Idum);
            // ModelChannel_AWGN_BPSK_repeat (&code, &decoder, &table,  NBIN, EbN,&Idum);
-        //ModelChannel_AWGN_64 (&code, &decoder, NBIN, EbN,&Idum);
+        ModelChannel_AWGN_64 (&code, &decoder, NBIN, EbN,&Idum);
         //ModelChannel(&code, &decoder,  NBIN, EbN,&Idum);
         #endif
 
@@ -372,7 +375,7 @@ int main(int argc, char * argv[])
 
 
 
-        if (nbErroneousFrames == 40)
+        if (nbErroneousFrames == 100)
             break;
 
 
