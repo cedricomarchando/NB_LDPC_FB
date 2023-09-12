@@ -29,6 +29,6 @@ obj/NB_LDPC.o: NB_LDPC.c include/csk.h include/syndrome_decoder.h include/bubble
 
 ########## Generation de l'executable #######################
 essai: obj/csk.o obj/init.o obj/tools.o obj/channel.o obj/bubble_decoder.o obj/NB_LDPC.o
-	gcc  -O3 -Wall -lm -o essai obj/csk.o obj/init.o obj/tools.o obj/channel.o obj/bubble_decoder.o obj/NB_LDPC.o
+	gcc  -O3 -Wall -o essai obj/csk.o obj/init.o obj/tools.o obj/channel.o obj/bubble_decoder.o obj/NB_LDPC.o -lm
 
 #fin makefile
