@@ -24,7 +24,7 @@
 #include "./include/NB_LDPC.h"
 
 /// preprocessing directives
-#define CCSK // use of Code-shift keying modulation
+//#define CCSK // use of Code-shift keying modulation
 
 
 
@@ -252,9 +252,9 @@ int main(int argc, char * argv[])
         //ModelChannel_AWGN_64APSK_CSK256(&csk,&code, &decoder, NBIN, EbN, &Idum);
         #endif
         #ifndef CCSK
-            //ModelChannel_AWGN_BPSK (&code, &decoder, &table,  NBIN, EbN,&Idum);
+            ModelChannel_AWGN_BPSK (&code, &decoder, &table,  NBIN, EbN,&Idum);
            // ModelChannel_AWGN_BPSK_repeat (&code, &decoder, &table,  NBIN, EbN,&Idum);
-        ModelChannel_AWGN_64 (&code, &decoder, NBIN, EbN,&Idum);
+        //ModelChannel_AWGN_64 (&code, &decoder, NBIN, EbN,&Idum);
         //ModelChannel(&code, &decoder,  NBIN, EbN,&Idum);
         #endif
 
@@ -375,7 +375,7 @@ int main(int argc, char * argv[])
 
 
 
-        if (nbErroneousFrames == 100)
+        if (nbErroneousFrames == 40)
             break;
 
 
