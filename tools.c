@@ -157,13 +157,10 @@ void GaussianElimination (code_t *code, table_t *table)
     int i;
 
     code->matUT = calloc((size_t)M,sizeof(int *));
-    //if (code->matUT == NULL) err(EXIT_FAILURE,"%s:%d > malloc failed !",__FILE__,__LINE__);
     code->matUT [0] = calloc((size_t)M*N,sizeof(int));
-    //if (code->matUT[0] == NULL) err(EXIT_FAILURE,"%s:%d > malloc failed !",__FILE__,__LINE__);
     for (k=1; k<M; k++) code->matUT[k] = code->matUT[0] + k*N;
 
     code->Perm 	= calloc(N,sizeof(int));
-    //if (code->Perm == NULL) err(EXIT_FAILURE,"%s:%d > malloc failed !",__FILE__,__LINE__);
 
     for (n=0; n<N; n++) code->Perm[n] = n;
 
@@ -174,55 +171,85 @@ void GaussianElimination (code_t *code, table_t *table)
             code->matUT[m][code->mat[m][k]] = code->matValue[m][k];
         }
     }
+    /*
+    printf("\n mat UT start \n");
+        for (m=0; m<M; m++)
+        {
+            for (k=0; k<code->N; k++)
+            {
+                printf("%d ",code->matUT[m][k] );
+            }
+            printf("\n");
+        }
+    getchar();*/
+
     for (m=0; m<M; m++)
     {
-        for (ind=m; ind<N; ind++)
+        for (ind=N-m-1; ind>-1; ind--)
         {
             if (code->matUT[m][ind]!=0) break;
         }
-        if (ind==N)
+        if (ind==0)
         {
             printf("The matrix is not full rank (%d,%d)\n",m,ind);
             exit(EXIT_FAILURE);
         }
+
+        // permute ind column with m column
         buf = code->Perm[ind];
-        code->Perm[ind] = code->Perm[m];
-        code->Perm[m] = buf;
+        code->Perm[ind] = code->Perm[N-m-1];
+        code->Perm[N-m-1] = buf;
         for (m1=0; m1<M; m1++)
         {
-            buf = code->matUT[m1][m];
-            code->matUT[m1][m] = code->matUT[m1][ind];
+            buf = code->matUT[m1][N-m-1];
+            code->matUT[m1][N-m-1] = code->matUT[m1][ind];
             code->matUT[m1][ind] = buf;
         }
 
+        
+        // put zero at column N-m, from line m1 = m+1 to M
         for (m1=m+1; m1<M; m1++)
         {
-            if (code->matUT[m1][m]!=0)
+            if (code->matUT[m1][N-m-1]!=0)
             {
-                buf=code->matUT[m1][m];
-                for (n=m; n<N; n++)
+                // update line m1
+                buf=code->matUT[m1][N-m-1];
+                for (n=0; n<N-m; n++)
                 {
                     if (code->matUT[m1][n]!=0)
                         code->matUT[m1][n] = table->DIVGF[code->matUT[m1][n]][buf];
                 }
-                for (n=m; n<N; n++)
+                for (n=0; n<N-m; n++)
                 {
                     if (code->matUT[m1][n]!=0)
-                        code->matUT[m1][n] = table->MULGF[code->matUT[m1][n]][code->matUT[m][m]];
+                        code->matUT[m1][n] = table->MULGF[code->matUT[m1][n]][code->matUT[m][N-m-1]];
                 }
-                for (n=m; n<N; n++)
+                for (n=0; n<N-m; n++)
                 {
-                                for(i=0; i<code->logGF; i++)
-                                {
-                                    temp[i] = (table->BINGF[code->matUT[m1][n]][i])^(table->BINGF[code->matUT[m][n]][i]);
-                                }
-                                code->matUT[m1][n] = Bin2GF(temp,code->GF,code->logGF,table->BINGF);
+                    for(i=0; i<code->logGF; i++)
+                    {
+                        temp[i] = (table->BINGF[code->matUT[m1][n]][i])^(table->BINGF[code->matUT[m][n]][i]);
+                    }
+                    code->matUT[m1][n] = Bin2GF(temp,code->GF,code->logGF,table->BINGF);
 
                     //code->matUT[m1][n] = table->ADDGF[code->matUT[m1][n]][code->matUT[m][n]];
                 }
             }
         }
     }
+    /*
+    printf("\n mat UT constructed \n");
+        for (m=0; m<M; m++)
+        {
+            for (k=0; k<code->N; k++)
+            {
+                printf("%d ",code->matUT[m][k] );
+            }
+            printf("\n");
+        }
+    getchar();*/
+
+
 }
 
 
@@ -247,11 +274,9 @@ int Encoding(code_t *code, table_t *table, int *CodeWord, int **NBIN, int *KSYMB
     int temp[12];
     int i;
 
-
     for (k=0 ; k<N-M; k++)
         {
-            NSYMB[M+k]=KSYMB[k];
-            //printf(" %d ",KSYMB[k]);
+            NSYMB[k]=KSYMB[k];
         }
         //getchar();
 
@@ -259,7 +284,7 @@ int Encoding(code_t *code, table_t *table, int *CodeWord, int **NBIN, int *KSYMB
     for (m=M-1; m>=0; m--)
     {
         buf=0;
-        for (n=m+1; n<N; n++)
+        for (n=0; n<N-m-1; n++)
         {
             if (code->matUT[m][n]!=0)
             {
@@ -272,7 +297,7 @@ int Encoding(code_t *code, table_t *table, int *CodeWord, int **NBIN, int *KSYMB
             }
         }
         /* Systematic codeword (interleaved) */
-        NSYMB[m] = table->DIVGF[buf][code->matUT[m][m]];
+        NSYMB[N-m-1] = table->DIVGF[buf][code->matUT[m][N-m-1]];
     }
 
     /* De-interleaving */
@@ -289,8 +314,6 @@ int Encoding(code_t *code, table_t *table, int *CodeWord, int **NBIN, int *KSYMB
         }
         //printf("%d ",CodeWord[n]);
     }
-    //printf(" \n ");
-    //getchar();
 
     return(0);
 }
